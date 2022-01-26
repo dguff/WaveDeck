@@ -1,2 +1,3 @@
-# PulseDec
-Toolbox for single photon deconvolution from digitized waveforms
+# WaveDeck
+
+Toolbox for ROOT-based digital pulse-processing

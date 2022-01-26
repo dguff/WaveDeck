@@ -1,3 +1,14 @@
+# Build directories
+/build
+/lib
+/bin
+
+# rootlogon
+rootlogon.C
+
+# VIM swap files
+*.swp
+
 # Prerequisites
 *.d
 

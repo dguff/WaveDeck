@@ -5,6 +5,7 @@
  */
 
 #include "TWDeck.h"
+#include "TMath.h"
 #include <utility>
 
 ClassImp(TWDeck)
@@ -12,14 +13,19 @@ ClassImp(TWDeck)
 TWDeck::TWDeck() : 
   fOrigin(nullptr), fResponse(nullptr), 
   fNoiseDensity(nullptr), fH2NoiseDensity(nullptr),
-  fFFT_R2C(nullptr), fFFT_C2R(nullptr)
-{}
+  fFFT_R2C(nullptr), fFFT_C2R(nullptr), 
+  fSize(100), fFFTSize(200)
+{
+  BuildFFT();
+}
 
 TWDeck::TWDeck(int n) : fOrigin(nullptr), fResponse(nullptr), 
   fNoiseDensity(nullptr), fH2NoiseDensity(nullptr), 
   fFFT_R2C(nullptr), fFFT_C2R(nullptr)
 {
   fSize = n;
+  fFFTSize = 2*n;
+  BuildFFT();
 }
 
 TWDeck::~TWDeck()
@@ -35,12 +41,45 @@ TWDeck::~TWDeck()
   fFilters.clear();
 }
 
-void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter) {
+void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wdeck::EWfmDomain kDomain) {
   TWDeckWfmFilter* pdec_filter = new TWDeckWfmFilter(*filter);
   ResizeFilter(pdec_filter);
+  int size_tmp = fFFTSize;
+  fFFTSize = pdec_filter->GetSize() + fSize;
+  if (kDomain == wdeck::kReal) {
+    FFTR2C(pdec_filter);
+  } else if (kDomain == wdeck::kComplex) {
+    FFTC2R(pdec_filter);
+  }
   fFilters.insert(std::make_pair(filter_name, pdec_filter));
+
+  fFFTSize = size_tmp;
 }
 
+
+void TWDeck::FFTR2C(TWDeckWfm* wfm) {
+  fFFT_R2C->SetPoints(&wfm->GetWfm().at(0));
+  fFFT_R2C->Transform();
+  double xre[10000] = {0};
+  double xim[10000] = {0};
+  fFFT_R2C->GetPointsComplex(xre, xim);
+  for (int i=0; i<fFFTSize; i++) {
+    wfm->GetWfmRe()[i] = xre[i];
+    wfm->GetWfmIm()[i] = xim[i];
+  }
+
+  return;
+}
+
+void TWDeck::FFTC2R(TWDeckWfm* wfm) {
+  fFFT_C2R->SetPointsComplex(&wfm->GetWfmRe().at(0), &wfm->GetWfmIm().at(0));
+  fFFT_C2R->Transform();
+  double* v = fFFT_C2R->GetPointsReal();
+  for (int j=0; j<wfm->GetSize(); j++)
+    wfm->GetWfm().at(j) = v[j];
+
+  return;
+}
 void TWDeck::ResizeFilters() {
   for (auto &f : fFilters) {
     if (!f.first.Contains("Wiener")) {
@@ -50,9 +89,13 @@ void TWDeck::ResizeFilters() {
 }
 
 void TWDeck::ResizeFilter(TWDeckWfmFilter* filter) {
-  size_t size_filter = filter->GetSize();
-  if (filter->GetWfm().size() != size_filter + fSize)
-    filter->GetWfm().resize(fSize+size_filter, 0.);
+  int size_filter = filter->GetSize();
+  if (size_filter != size_filter + fSize)
+  {
+    filter->GetWfm  ().resize(fSize+size_filter, 0.);
+    filter->GetWfmRe().resize(fSize+size_filter, 0.);
+    filter->GetWfmIm().resize(fSize+size_filter, 0.);
+  }
   
   return;
 }
@@ -66,7 +109,6 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name) {
 
   TWDeckWfmFilter* filter = fFilters.find(filter_name)->second;
 
-  printf("TWDeck::ApplyFilter: copy input waveform...\n");
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
     fSize = wfm_tmp.GetSize();
@@ -76,42 +118,27 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name) {
   int size_tmp = filter->GetSize() + wfm_tmp.GetSize();
   fFFTSize = size_tmp;
 
-  printf("TWDeck::ApplyFilter: resize waveform to %i...\n", size_tmp);
   wfm_tmp.SetSize(size_tmp);
   
-  printf("TWDeck::ApplyFilter: instance FFTs...\n");
-  BuildFFT();
+  FFTR2C(&wfm_tmp);
 
-  printf("TWDeck::ApplyFilter: Transform wave...\n");
-  fFFT_R2C->SetPoints(&wfm_tmp.GetWfm().at(0));
-  fFFT_R2C->Transform();
-  fFFT_R2C->GetPointsComplex(&wfm_tmp.GetWfmRe().at(0), &wfm_tmp.GetWfmIm().at(0));
-  
-  printf("TWDeck::ApplyFilter: Transform filter...\n");
-  fFFT_R2C->SetPoints(&filter->GetWfm().at(0));
-  fFFT_R2C->Transform();
-  fFFT_R2C->GetPointsComplex(&filter->GetWfmRe().at(0), &filter->GetWfmIm().at(0));
-
-  printf("TWDeck::ApplyFilter: Perform convolution...\n");
   for (int i = 0; i < size_tmp; i++) {
     TComplex F = TComplex(filter->GetWfmRe()[i], filter->GetWfmIm()[i]);
     TComplex W = TComplex(wfm_tmp.GetWfmRe()[i], wfm_tmp.GetWfmIm()[i]);
-
-    TComplex C = W*F*TMath::Exp(TComplex(0, -filter->GetBandwidth() / fFFTSize));
+  
+    TComplex C = W*F;
+    // apply shift to account for filter possible shift
+    TComplex ph = TComplex(0., +TMath::TwoPi()*i*filter->GetShift()/fFFTSize);
+    C = C * TComplex::Exp(ph);
     wfm_tmp.GetWfmRe()[i] = C.Re();
     wfm_tmp.GetWfmIm()[i] = C.Im();
   }
 
-  fFFT_C2R->SetPointsComplex(&wfm_tmp.GetWfmRe().at(0), &wfm_tmp.GetWfmIm().at(0));
-  fFFT_C2R->Transform();
-  double* xw_tmp;
-  xw_tmp = fFFT_C2R->GetPointsReal();
-
+  FFTC2R(&wfm_tmp);
+  
   for (int i=0; i<wfm->GetSize(); i++) {
-    wfm->GetWfm()[i] = xw_tmp[i] / size_tmp;
+    wfm->GetWfm()[i] = wfm_tmp.GetWfm().at(i) / size_tmp;
   }
-
-  printf("DONE. Ready to return.\n\n");
 
   return;
 }

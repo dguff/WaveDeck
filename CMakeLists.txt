@@ -36,7 +36,8 @@ add_definitions(${ROOT_CXX_FLAGS})
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # configure rootlogon and project path
-configure_file(src/include/rootlogon.C.in "${PROJECT_SOURCE_DIR}/rootlogon.C" @ONLY)
+configure_file(src/include/rootlogon.C.in 
+  "${PROJECT_SOURCE_DIR}/examples/rootlogon.C" @ONLY)
 
 # configure package config
 include(CMakePackageConfigHelpers)
@@ -53,15 +54,16 @@ add_subdirectory(src/src)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add executables 
-#add_executable(chi2_ssm chi2_ssm.C)
-#add_dependencies(chi2_ssm B16dataParser)
-#target_link_libraries(chi2_ssm ${ROOT_LIBRARIES} ${B16DATA_LIB} NuSol  )
+SET(CMAKE_INSTALL_RPATH "${WDECK_LIB_DIR}")
+add_executable(wdeck_smoothing examples/example_wdeck_smoothing.cc)
+target_link_libraries(wdeck_smoothing ${ROOT_LIBRARIES} TWDeck )
 
-#install(TARGETS chi2_ssm 
-  #LIBRARY DESTINATION "${CHI2_SSM_LIB_DIR}"
-  #ARCHIVE DESTINATION "${CHI2_SSM_LIB_DIR}"
-  #RUNTIME DESTINATION "${CHI2_SSM_BIN_DIR}")
+install(TARGETS wdeck_smoothing 
+  LIBRARY DESTINATION "${WDECK_BIN_DIR}"
+  ARCHIVE DESTINATION "${WDECK_BIN_DIR}"
+  RUNTIME DESTINATION "${WDECK_BIN_DIR}"
+)
 
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 
-    DESTINATION ${WDECK_BIN_DIR}/WaveDeck/cmake)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 
+  DESTINATION ${WDECK_BIN_DIR}/WaveDeck/cmake)
 

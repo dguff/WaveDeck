@@ -23,7 +23,7 @@ class TWDeck : public TObject {
     ~TWDeck();
 
     void ApplyFilter(TWDeckWfm* wfm, TString filter_name);
-    void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter);
+    void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wdeck::EWfmDomain kDomain = wdeck::kReal);
     void ResizeFilters();
 
 
@@ -40,6 +40,8 @@ class TWDeck : public TObject {
 
     void      BuildFFT();
     void      ResizeFilter(TWDeckWfmFilter* filter);
+    void      FFTR2C(TWDeckWfm* wfm);
+    void      FFTC2R(TWDeckWfm* wfm);
   public:
     ClassDef(TWDeck, 1)
 };

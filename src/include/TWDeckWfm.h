@@ -14,6 +14,10 @@
 #include "TGraph.h"
 #include "TComplex.h"
 
+namespace wdeck{
+  enum EWfmDomain {kReal = 0, kComplex = 1};
+}
+
 class TWDeckWfm : public TNamed {
   public:
     TWDeckWfm();

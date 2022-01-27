@@ -31,9 +31,7 @@ TWDeckWfm::TWDeckWfm(const TWDeckWfm& wfm) {
   }
 }
 
-TWDeckWfm::~TWDeckWfm() {
-  printf("Calling ~TWDeckWfm\n");
-}
+TWDeckWfm::~TWDeckWfm() {}
 
 void TWDeckWfm::ClearWave() {
   for (auto &v : fWfm   ) v = 0.;

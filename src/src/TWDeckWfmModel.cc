@@ -10,31 +10,44 @@ ClassImp(TWDeckWfmModel)
 
 TWDeckWfmModel::TWDeckWfmModel() : 
   fNSampleWave(0), fNSampleSpectrum(0), 
-  fSpectralDensity(nullptr), fWaveDensity(nullptr) {}
+  fSpectralDensityHist(nullptr), fWaveDensityHist(nullptr) {}
 
-TWDeckWfmModel::TWDeckWfmModel(int N) : TWDeckWfm(N),
+TWDeckWfmModel::TWDeckWfmModel(int N) : 
   fNSampleWave(0), fNSampleSpectrum(0), 
-  fSpectralDensity(nullptr), fWaveDensity(nullptr)  {}
-
-TWDeckWfmModel::TWDeckWfmModel(int N, double* data) : TWDeckWfm(N),
-  fNSampleWave(0),  fNSampleSpectrum(0), 
-  fSpectralDensity(nullptr), fWaveDensity(nullptr)  
+  fSpectralDensityHist(nullptr), fWaveDensityHist(nullptr)  
 {
+  SetSize(N);
+}
+
+TWDeckWfmModel::TWDeckWfmModel(int N, double* data) :
+  fNSampleWave(0),  fNSampleSpectrum(0), 
+  fSpectralDensityHist(nullptr), fWaveDensityHist(nullptr)  
+{
+  SetSize(N);
   AddWaveform(data);
 }
 
 TWDeckWfmModel::TWDeckWfmModel(const TWDeckWfmModel& model) : TWDeckWfm(model)
 {
-  fNSampleWave     = model.fNSampleWave;
-  fNSampleSpectrum = model.fNSampleSpectrum;
-  fSpectralDensity = (TH2D*)model.fSpectralDensity->Clone();
-  fWaveDensity     = (TH2D*)model.fSpectralDensity->Clone();
+  fSpectralDensity.resize(fSize);
+  for (int i=0; i<fSize; i++) {
+    fSpectralDensity[i] = model.fSpectralDensity[i];
+  }
+  fNSampleWave         = model.fNSampleWave;
+  fNSampleSpectrum     = model.fNSampleSpectrum;
+  fSpectralDensityHist = (TH2D*)model.fSpectralDensityHist->Clone();
+  fWaveDensityHist     = (TH2D*)model.fWaveDensityHist->Clone();
 }
 
 TWDeckWfmModel::~TWDeckWfmModel()
 {
-  if (fSpectralDensity) {delete fSpectralDensity;}
-  if (fWaveDensity    ) {delete fWaveDensity;}
+  if (fSpectralDensityHist) {delete fSpectralDensityHist;}
+  if (fWaveDensityHist    ) {delete fWaveDensityHist;}
+}
+
+void TWDeckWfmModel::SetSize(int n)  {
+  TWDeckWfm::SetSize(n);
+  fSpectralDensity.resize(n, 0.);
 }
 
 void TWDeckWfmModel::BuildWaveDensity(double* data) {
@@ -43,7 +56,7 @@ void TWDeckWfmModel::BuildWaveDensity(double* data) {
 
   std::vector<double> xbins = linspace(0., (double)fSize, fSize+1);
   std::vector<double> ybins = linspace(1.3*ymin, 1.3*ymax, 101);
-  fWaveDensity = new TH2D(
+  fWaveDensityHist = new TH2D(
       Form("%s_wdensity", fName.Data()), 
       Form("%s wfm density:Time [ticks]:Amplitude", fTitle.Data()), 
       fSize, &xbins[0], 100, &ybins[0]);
@@ -67,7 +80,7 @@ void TWDeckWfmModel::BuildSpectralDensity(double* xre, double* xim) {
   std::vector<double> ybins(ybins_ex);
   for (auto &v : ybins) v = TMath::Power(10., v);
 
-  fSpectralDensity = new TH2D(
+  fSpectralDensityHist = new TH2D(
       Form("%s_sdensity", fName.Data()), 
       Form("%s spectral density", fTitle.Data()), 
       fSize*0.5, &xbins[0], 50, &ybins[0]);
@@ -82,7 +95,7 @@ void TWDeckWfmModel::AddWaveform(double* data) {
   int ii=0;
   for (auto &v : fWfm) {
     v = ((fNSampleWave-1)*v + data[ii]) / fNSampleWave;
-    fWaveDensity->Fill(ii, data[ii]);
+    fWaveDensityHist->Fill(ii, data[ii]);
     ++ii;
   }
   return;
@@ -98,9 +111,8 @@ void TWDeckWfmModel::AddSpectrum(double* re, double* im)
     fWfm_re[j] = ((fNSampleSpectrum-1)*fWfm_re[j] + re[j]) / fNSampleSpectrum;
     fWfm_im[j] = ((fNSampleSpectrum-1)*fWfm_im[j] + im[j]) / fNSampleSpectrum;
 
-    //printf("%i: %g + i(%g)\n", j, re[j], im[j]);
-    //getchar();
-    fSpectralDensity->Fill(j, c_.Rho2());
+    fSpectralDensity.at(j) = ((fNSampleSpectrum-1)*fSpectralDensity.at(j) + c_.Rho2()) / fNSampleSpectrum;
+    fSpectralDensityHist->Fill(j, c_.Rho2());
   }
   return;
 }

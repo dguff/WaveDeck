@@ -92,3 +92,12 @@ double TWDeckWfm::GetSpectralDensity(int i) {
   TComplex c(fWfm_re.at(i), fWfm_im.at(i));
   return c.Rho2();
 }
+
+std::vector<double> TWDeckWfm::GetSpectralDensityPoints() {
+  std::vector<double> rho2(fSize*0.5+1, 0.);
+  for (int i=0; i<fSize*0.5+1; i++)
+    rho2.at(i) = GetSpectralDensity(i);
+  return rho2;
+}
+
+

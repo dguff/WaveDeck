@@ -36,7 +36,8 @@ void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wd
   TWDeckWfmFilter* pdec_filter = new TWDeckWfmFilter(*filter);
   ResizeFilter(pdec_filter);
   int size_tmp = fFFTSize;
-  fFFTSize = pdec_filter->GetSize() + fSize;
+  int size = pdec_filter->GetSize() + fSize;
+  BuildFFT(size);
   if (kDomain == wdeck::kReal) {
     FFTR2C(pdec_filter);
   } else if (kDomain == wdeck::kComplex) {
@@ -44,7 +45,7 @@ void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wd
   }
   fFilters.insert(std::make_pair(filter_name, pdec_filter));
 
-  fFFTSize = size_tmp;
+  BuildFFT(size_tmp);
 }
 
 
@@ -75,7 +76,7 @@ void TWDeck::FFTR2C(TWDeckWfm* wfm, int size) {
     wfm->GetWfmIm()[i] = xim[i];
   }
   // restore original FFT size
-  BuildFFT(fFFTSize);
+  BuildFFT(size_fft_tmp);
   return;
 }
 
@@ -109,7 +110,7 @@ void TWDeck::Add2Model(TWDeckWfm* wfm, TWDeckWfmModel* model) {
   if (fFFTSize != wfm->GetSize()) BuildFFT(wfm->GetSize());
   FFTR2C(wfm);
   
-  model->AddWaveform(&wfm->GetWfm()[0]);
+  model->AddWaveform(&wfm->GetWfm  ()[0]);
   model->AddSpectrum(&wfm->GetWfmRe()[0], &wfm->GetWfmIm()[0]);
 }
 
@@ -149,7 +150,7 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name) {
   }
 
   int size_tmp = filter->GetSize() + wfm_tmp.GetSize();
-  fFFTSize = size_tmp;
+  BuildFFT(size_tmp);
 
   wfm_tmp.SetSize(size_tmp);
   
@@ -174,13 +175,13 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name) {
   FFTC2R(&wfm_tmp);
   
   for (int i=0; i<wfm->GetSize(); i++) {
-    wfm->GetWfm()[i] = wfm_tmp.GetWfm().at(i) / size_tmp;
+    wfm->GetWfm()[i] = wfm_tmp.GetWfm().at(i);
   }
 
   return;
 }
 
-void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter) {
+void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) {
 
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
@@ -188,17 +189,23 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter) {
     ResizeFilter(filter);
   }
 
-  int size_tmp = filter->GetSize() + wfm_tmp.GetSize();
+  int size_tmp = filter->GetSize();
+  if (padding) size_tmp += wfm_tmp.GetSize();
   BuildFFT(size_tmp);
 
   wfm_tmp.SetSize(size_tmp);
   
+  printf("FFT size is %i\n", fFFTSize);
   FFTR2C(&wfm_tmp);
   
   double fltr_shift = filter->GetShift();
   bool apply_shift = !(fltr_shift == 0);
 
-  for (int i = 0; i < size_tmp; i++) {
+  int nloop = 0.5*size_tmp+1; 
+  if (padding) nloop = size_tmp;
+
+
+  for (int i = 0; i < nloop; i++) {
     TComplex F = TComplex(filter->GetWfmRe()[i], filter->GetWfmIm()[i]);
     TComplex W = TComplex(wfm_tmp.GetWfmRe()[i], wfm_tmp.GetWfmIm()[i]);
   

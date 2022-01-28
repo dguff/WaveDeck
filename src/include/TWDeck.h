@@ -25,7 +25,7 @@ class TWDeck : public TObject {
 
     void Add2Model  (TWDeckWfm* wfm, TWDeckWfmModel* model);
     void ApplyFilter(TWDeckWfm* wfm, TString filter_name);
-    void ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter);
+    void ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding);
 
     void BuildFFT(int size = 1000);
     void FFTR2C(TWDeckWfm* wfm);

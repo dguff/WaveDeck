@@ -43,6 +43,7 @@ class TWDeckWfm : public TNamed {
     inline double         
       GetPointRead(int i) {return fWfm.at(i);}
     double GetSpectralDensity(int i);
+    std::vector<double>    GetSpectralDensityPoints();
 
     std::vector<TComplex>  GetPointsComplex();
     std::vector<double>&   GetPointsReal() {return fWfm;}

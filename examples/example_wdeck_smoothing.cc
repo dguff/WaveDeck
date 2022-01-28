@@ -100,8 +100,9 @@ int example_wdeck_smoothing(int n_p = 2) {
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
   // I N S T A N C E   W D E C K
   TWDeck wdeck(size);
-  for (int i=0; i<n_fltr; i++) 
+  for (int i=0; i<n_fltr; i++) {
     wdeck.RegisterFilter(fltr_name[i], filter[i]);
+  }
   
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
   // A P P L Y   F I L T E R S

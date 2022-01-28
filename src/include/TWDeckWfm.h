@@ -23,11 +23,14 @@ class TWDeckWfm : public TNamed {
     TWDeckWfm();
     TWDeckWfm(int N);
     TWDeckWfm(int N, double* wfm);
+    TWDeckWfm(int N, double* re, double* im);
     TWDeckWfm(const TWDeckWfm& wfm);
     ~TWDeckWfm();
     
     void                   ClearWave();
 
+    void                   LoadSpectrum(int n, double* re, double* im);
+    void                   LoadSpectrum(double* re, double* im);
     void                   LoadWave(int n, double* w);
     void                   LoadWave(double* w);
 
@@ -35,7 +38,14 @@ class TWDeckWfm : public TNamed {
     std::vector<double>&   GetWfm   () {return fWfm;}
     std::vector<double>&   GetWfmRe () {return fWfm_re;}
     std::vector<double>&   GetWfmIm () {return fWfm_im;}
-    std::vector<TComplex>  GetWfmC  ();
+    inline TComplex        
+      GetPointComplex(int i) {return TComplex(fWfm_re.at(i), fWfm_im.at(i));}
+    inline double         
+      GetPointRead(int i) {return fWfm.at(i);}
+    double GetSpectralDensity(int i);
+
+    std::vector<TComplex>  GetPointsComplex();
+    std::vector<double>&   GetPointsReal() {return fWfm;}
     void                   SetSize(int n);
 
   protected:

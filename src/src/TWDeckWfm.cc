@@ -8,17 +8,26 @@
 
 ClassImp(TWDeckWfm)
 
-TWDeckWfm::TWDeckWfm() : fSize(0) {}
+TWDeckWfm::TWDeckWfm() : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) {}
 
-TWDeckWfm::TWDeckWfm(int N) {
+TWDeckWfm::TWDeckWfm(int N) : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+{
   SetSize(N);
 }
 
-TWDeckWfm::TWDeckWfm(int N, double* wfm) {
+TWDeckWfm::TWDeckWfm(int N, double* wfm) : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+{
   LoadWave(N, wfm);
 }
 
-TWDeckWfm::TWDeckWfm(const TWDeckWfm& wfm) {
+TWDeckWfm::TWDeckWfm(int N, double* re, double* im) 
+  : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+{
+  LoadSpectrum(N, re, im);
+}
+
+TWDeckWfm::TWDeckWfm(const TWDeckWfm& wfm) : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+{
   fName = wfm.fName;
   fTitle = wfm.fTitle;
   fSize = wfm.fSize;
@@ -50,6 +59,18 @@ void TWDeckWfm::LoadWave(int n, double* w) {
   LoadWave(w);
 }
 
+void TWDeckWfm::LoadSpectrum(double* re, double* im) {
+  for (int i=0; i<fSize; i++) {
+    fWfm_re[i] = re[i];
+    fWfm_im[i] = im[i];
+  }
+}
+
+void TWDeckWfm::LoadSpectrum(int N, double* re, double* im) {
+  SetSize(N);
+  LoadSpectrum(re, im); 
+}
+
 void TWDeckWfm::SetSize(int n) {
   fSize = n;
 
@@ -58,11 +79,16 @@ void TWDeckWfm::SetSize(int n) {
   fWfm_im.resize(fSize, 0.);
 }
 
-std::vector<TComplex> TWDeckWfm::GetWfmC() {
+std::vector<TComplex> TWDeckWfm::GetPointsComplex() {
   std::vector<TComplex> vWfmC(fSize);
   for (int i=0; i<fSize; i++) {
     vWfmC[i] = TComplex(fWfm_re[i], fWfm_im[i]);
   }
 
   return vWfmC;
+}
+
+double TWDeckWfm::GetSpectralDensity(int i) {
+  TComplex c(fWfm_re.at(i), fWfm_im.at(i));
+  return c.Rho2();
 }

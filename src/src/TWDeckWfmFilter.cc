@@ -11,7 +11,12 @@ ClassImp(TWDeckWfmFilter)
 TWDeckWfmFilter::TWDeckWfmFilter() : TWDeckWfm()
 { }
 
+TWDeckWfmFilter::TWDeckWfmFilter(int N) : TWDeckWfm(N) {}
+
 TWDeckWfmFilter::TWDeckWfmFilter(int N, double* x) : TWDeckWfm(N, x) {}
+
+TWDeckWfmFilter::TWDeckWfmFilter(int N, double* re, double* im) 
+  : TWDeckWfm(N, re, im) {}
 
 TWDeckWfmFilter::TWDeckWfmFilter(int N, wdeck::EFltrShape kShape, double bw) {
   SetSize(N);

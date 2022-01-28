@@ -18,7 +18,9 @@ namespace wdeck {
 class TWDeckWfmFilter : public TWDeckWfm {
   public : 
     TWDeckWfmFilter();
+    TWDeckWfmFilter(int N);
     TWDeckWfmFilter(int N, double* x);
+    TWDeckWfmFilter(int N, double* re, double* im);
     TWDeckWfmFilter(int N, wdeck::EFltrShape kShape, double bw);
     TWDeckWfmFilter(const TWDeckWfmFilter& filter);
     ~TWDeckWfmFilter();

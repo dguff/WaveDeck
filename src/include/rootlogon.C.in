@@ -1,4 +1,5 @@
 {
     gInterpreter->AddIncludePath("@WDECK_INCLUDE_DIR@");
+    gInterpreter->Load("@WDECK_LIB_DIR@/libTWDeckWfm.so");
     gInterpreter->Load("@WDECK_LIB_DIR@/libTWDeck.so");
 }

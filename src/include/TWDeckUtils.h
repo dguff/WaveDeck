@@ -9,6 +9,8 @@
 #define TWDECKUTILS_H
 
 #include <vector>
+#include "TF1.h"
+#include "TGraph.h"
 
 /**
  * @brief Returns a std::vector of N equally spaced points between a and b
@@ -31,6 +33,51 @@ inline std::vector<T> linspace(T a, T b, size_t N) {
   return xs;
 }
 
+
+/**
+ * @brief Compute the integral of a TGraph object
+ *
+ * @param g Target `TGraph`
+ * @param x0 Integration lower boundary
+ * @param x1 Integration upper boundary
+ *
+ * @return 
+ */
+inline double g_integral(TGraph* g, double x0, double x1) {
+  auto fc_gintegral = [g](double *x, double* p) {
+    return p[0]*g->Eval(x[0]);
+  };
+  TF1 f("f", fc_gintegral, x0, x1, 1);
+  f.SetNpx(g->GetN());
+  f.SetParameter(0, 1.);
+  return f.Integral(x0, x1, 1e-1);
+}
+
+/**
+ * @brief Scale all the Y-points of a `TGraph`
+ *
+ * @param g targer `TGraph`
+ * @param c scale factor
+ */
+inline void g_scale_Y(TGraph* g, double c) {
+  for (int i=0; i<g->GetN(); i++) {
+    g->GetY()[i] *= c;
+  }
+  return;
+}
+
+/**
+ * @brief Scale all the X-points of a `TGraph`
+ *
+ * @param g targer `TGraph`
+ * @param c scale factor
+ */
+inline void g_scale_X(TGraph* g, double c) {
+  for (int i=0; i<g->GetN(); i++) {
+    g->GetX()[i] *= c;
+  }
+  return;
+}
 
 
 #endif /* end of include guard TWDECKUTILS_H */

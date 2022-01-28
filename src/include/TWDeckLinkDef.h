@@ -9,8 +9,8 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class TWDeckWfm++;
 #pragma link C++ class TWDeckWfmFilter++;
+#pragma link C++ class TWDeckWfmModel++;
 #pragma link C++ class std::map<TString, TWDeckWfmFilter*>++;
 #pragma link C++ class TWDeck++;
 

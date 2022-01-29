@@ -50,6 +50,7 @@ int example_wdeck_wiener(int n_p = 2) {
 
   double xv  [size] = {0}; // waveform array
   std::vector<double> xt = linspace(t0, t1, size);
+  std::vector<double> xtick = linspace(0.5, 0.5+(size), size+1);
   const int nph_true = gRandom->Poisson(n_p);   // true number of p.e.
   std::vector<double> tph_true(nph_true, 0.); // true time of p.e. 
   for (auto &t : tph_true) t = gRandom->Rndm()*30 + 5.;
@@ -98,18 +99,19 @@ int example_wdeck_wiener(int n_p = 2) {
   double spe_offset = 5.;
   for (int i=0; i<size; i++) spe_xv[i] = spe_response(xt[i]-spe_offset);
   TWDeckWfm* wfm_spe = new TWDeckWfm(size, spe_xv);
-  TGraph gspe(size, &xt[0], spe_xv); 
-  double spe_integral = g_integral(gspe_origin, 0., 2.5);
+  TGraph gspe(size, &xtick[0], spe_xv); 
+  double spe_integral = g_integral(&gspe, 0., 1255);
   printf("spe pulse integral = %g\n", spe_integral);
   new TCanvas("cSpe");
   gspe.DrawClone("awpl");
 
   // - - - - - - - - - - - - - - - - - - -  create template for the delta 
   double delta_xv[size] = {0};
-  double delta_offset = 25.;
+  double delta_offset = 1000.;
   for (int i=0; i<size; i++) 
-    delta_xv[i] = spe_integral*TMath::Gaus(xt[i], delta_offset, dt, true)*dt;
-  TGraph gdelta(size, &xt[0], delta_xv);
+    delta_xv[i] = TMath::Gaus(i, delta_offset, 1., true);
+  TGraph gdelta(size, &xtick[0], delta_xv);
+  gdelta.SetLineColor(kBlue);
   gdelta.DrawClone("pl");
   TWDeckWfm* wfm_delta = new TWDeckWfm(size, delta_xv);
 
@@ -139,7 +141,6 @@ int example_wdeck_wiener(int n_p = 2) {
   TCanvas* cNoiseDensity = new TCanvas("cNoiseDensity", "Noise Density plots", 1000, 600);
   cNoiseDensity->Divide(2, 1);
   cNoiseDensity->cd(1);
-  std::vector<double> xtick = linspace(0.5, 0.5+(size), size+1);
   wm_noise->GetWavefmDensityHist()  ->Draw("colz");
   TGraph* gwmodel_wave = new TGraph(size, &xtick[0], &wm_noise->GetWfm()[0]);
   gwmodel_wave->SetLineWidth(3); gwmodel_wave->SetLineWidth(kMagenta+7);

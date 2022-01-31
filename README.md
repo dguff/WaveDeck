@@ -1,3 +1,3 @@
 # WaveDeck
 
-Toolbox for ROOT-based digital pulse-processing
+A command deck for ROOT-based digital pulse-processing

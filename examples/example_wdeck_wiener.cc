@@ -99,26 +99,19 @@ int example_wdeck_wiener(int n_p = 2) {
   double spe_offset = 5.;
   for (int i=0; i<size; i++) spe_xv[i] = spe_response(xt[i]-spe_offset);
   TWDeckWfm* wfm_spe = new TWDeckWfm(size, spe_xv);
-  TGraph gspe(size, &xtick[0], spe_xv); 
-  double spe_integral = g_integral(&gspe, 0., 1255);
-  printf("spe pulse integral = %g\n", spe_integral);
-  new TCanvas("cSpe");
-  gspe.DrawClone("awpl");
-
+  //
   // - - - - - - - - - - - - - - - - - - -  create template for the delta 
   double delta_xv[size] = {0};
   double delta_offset = 1000.;
   for (int i=0; i<size; i++) 
     delta_xv[i] = TMath::Gaus(i, delta_offset, 1., true);
-  TGraph gdelta(size, &xtick[0], delta_xv);
-  gdelta.SetLineColor(kBlue);
-  gdelta.DrawClone("pl");
   TWDeckWfm* wfm_delta = new TWDeckWfm(size, delta_xv);
 
-  // assemble the Wiener filter
+  // - - - - - - - - - - Use WaveDeck to compute the FFT of the templates
   wdeck.FFTR2C(wfm_spe);
   wdeck.FFTR2C(wfm_delta);
 
+  // - - - - - - - - - - - - - - - - - - - - - Assemble the Wiener filter
   TWDeckWfmFilter* wiener = new TWDeckWfmFilter(size);
   for (int i=0; i<size; i++) {
     TComplex h  = TComplex::Conjugate(wfm_spe->GetPointComplex(i));
@@ -129,8 +122,10 @@ int example_wdeck_wiener(int n_p = 2) {
     wiener->GetWfmRe()[i] = cw.Re();
     wiener->GetWfmIm()[i] = cw.Im();
   }
+  // compensate for the offset in the response template
   wiener->SetShift(-spe_offset/dt);
   
+  // - - - - - - - - Apply the filter to a clone of the original waveform 
   TWDeckWfm* wfm_filtered = new TWDeckWfm(*wfm_origin);
   wdeck.ApplyFilter(wfm_filtered, wiener, false);
   for (auto &v : wfm_filtered->GetWfm()) v /= dt;
@@ -138,6 +133,11 @@ int example_wdeck_wiener(int n_p = 2) {
   cWaveform->cd();
   gw_filtered->Draw("l)");
 
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
+  // P L O T S
+  //
+
+  //
   TCanvas* cNoiseDensity = new TCanvas("cNoiseDensity", "Noise Density plots", 1000, 600);
   cNoiseDensity->Divide(2, 1);
   cNoiseDensity->cd(1);
@@ -156,6 +156,9 @@ int example_wdeck_wiener(int n_p = 2) {
   gwmodel_sptd->Draw("l");
 
   TCanvas* cSpectralDensity = new TCanvas("cSpectralDensity", "Spectral Density", 0, 0, 800, 600);
+  cSpectralDensity->SetTicks(1, 1);
+  cSpectralDensity->SetGrid(1, 1);
+  cSpectralDensity->SetLogy(1);
   std::vector<double> xDdelta = wfm_delta->GetSpectralDensityPoints();
   std::vector<double> xDnoise = wm_noise->GetSpectralDensityPoints();
   std::vector<double> xDspe   = wfm_spe  ->GetSpectralDensityPoints();

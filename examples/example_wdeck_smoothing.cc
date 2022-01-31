@@ -112,7 +112,7 @@ int example_wdeck_smoothing(int n_p = 2) {
   cWaveform->cd();
   for (int i=0; i<n_fltr; i++) {
     wfm_filtered[i] = new TWDeckWfm(size, xv);
-    wdeck.ApplyFilter(wfm_filtered[i], fltr_name[i]);
+    wdeck.ApplyFilter(wfm_filtered[i], fltr_name[i], true);
 
     gw_filtered[i] = new TGraph(size, &xt[0], &wfm_filtered[i]->GetWfm()[0]);
     gw_filtered[i]->SetLineWidth(3);

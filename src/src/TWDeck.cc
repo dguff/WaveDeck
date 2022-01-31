@@ -10,6 +10,10 @@
 
 ClassImp(TWDeck)
 
+/**
+ * @details Initialize the WaveDeck size to 1000 (FFT size 2000) 
+ * and build the FFT interfaces
+ */
 TWDeck::TWDeck() : 
   fFFT_R2C(nullptr), fFFT_C2R(nullptr), 
   fSize(1000), fFFTSize(2000)
@@ -17,6 +21,12 @@ TWDeck::TWDeck() :
   BuildFFT();
 }
 
+/**
+ * @details Initialize the WaveDeck to `n` and built the 
+ * FFT interfaces
+ *
+ * @param n WaveDeck size
+ */
 TWDeck::TWDeck(int n) : 
   fFFT_R2C(nullptr), fFFT_C2R(nullptr)
 {
@@ -32,6 +42,18 @@ TWDeck::~TWDeck()
   fFilters.clear();
 }
 
+/**
+ * @details Register the `filter` under the key `filter_name` in the list 
+ * #fFilters. The filters can be recalled from TWDeck by their `filter_name`.
+ * When storing a filter, the used must specify if this in the 
+ * time (#wdeck::kReal) or complex (#wdeck::kComplex) domain, so that the missing 
+ * representation can be computed. 
+ * Before being added to the filters' list, the filter is resized 
+ *
+ * @param filter_name Filter name (key)
+ * @param filter Filter
+ * @param kDomain
+ */
 void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wdeck::EWfmDomain kDomain) {
   TWDeckWfmFilter* pdec_filter = new TWDeckWfmFilter(*filter);
   ResizeFilter(pdec_filter);
@@ -49,11 +71,17 @@ void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wd
 }
 
 
+/**
+ * @details Perform a FFT from Real to complex of 
+ * the TWDeckWfm `wfm` assuming the size given by #fSize.
+ *
+ * @param wfm Waveform to be transformed
+ */
 void TWDeck::FFTR2C(TWDeckWfm* wfm) {
   fFFT_R2C->SetPoints(&wfm->GetWfm().at(0));
   fFFT_R2C->Transform();
-  double xre[10000] = {0};
-  double xim[10000] = {0};
+  double xre[50000] = {0};
+  double xim[50000] = {0};
   fFFT_R2C->GetPointsComplex(xre, xim);
   for (int i=0; i<fFFTSize; i++) {
     wfm->GetWfmRe()[i] = xre[i];
@@ -63,13 +91,23 @@ void TWDeck::FFTR2C(TWDeckWfm* wfm) {
   return;
 }
 
+/**
+ * @details Perform a FFT from Real to complex of 
+ * the TWDeckWfm `wfm` with the specified `size`.
+ * If `size` does not match the one currently used by #fFFT_R2C, 
+ * the FFT engine is delete and recreated with the correct size. 
+ * The original #fFFTSize is then restored after the transformation
+ * has been performed. 
+ *
+ * @param wfm Waveform to be transformed
+ */
 void TWDeck::FFTR2C(TWDeckWfm* wfm, int size) {
   int size_fft_tmp = fFFTSize;
   BuildFFT(size);
   fFFT_R2C->SetPoints(&wfm->GetWfm().at(0));
   fFFT_R2C->Transform();
-  double xre[10000] = {0};
-  double xim[10000] = {0};
+  double xre[50000] = {0};
+  double xim[50000] = {0};
   fFFT_R2C->GetPointsComplex(xre, xim);
   for (int i=0; i<fFFTSize; i++) {
     wfm->GetWfmRe()[i] = xre[i];
@@ -80,7 +118,14 @@ void TWDeck::FFTR2C(TWDeckWfm* wfm, int size) {
   return;
 }
 
-
+/**
+ * @details Perform a FFT from Complex to Real of 
+ * the TWDeckWfm `wfm` assuming the size given by #fSize.
+ * The output is scaled for the inverse of the size of the 
+ * transform to account for the implementation of the FFT in fftw3.
+ *
+ * @param wfm Waveform to be transformed
+ */
 void TWDeck::FFTC2R(TWDeckWfm* wfm) {
   fFFT_C2R->SetPointsComplex(&wfm->GetWfmRe().at(0), &wfm->GetWfmIm().at(0));
   fFFT_C2R->Transform();
@@ -92,6 +137,18 @@ void TWDeck::FFTC2R(TWDeckWfm* wfm) {
   return;
 }
 
+/**
+ * @details Perform a FFT from Complex to Real of 
+ * the TWDeckWfm `wfm` with the specified `size`.
+ * If `size` does not match the one currently used by #fFFT_C2R, 
+ * the FFT engine is delete and recreated with the correct size. 
+ * The original #fFFTSize is then restored after the transformation
+ * has been performed. 
+ * The output is scaled for the inverse of the size of the 
+ * transform to account for the implementation of the FFT in fftw3.
+ *
+ * @param wfm Waveform to be transformed
+ */
 void TWDeck::FFTC2R(TWDeckWfm* wfm, int size) {
   int size_tmp = fFFTSize;
   BuildFFT(size);
@@ -106,6 +163,10 @@ void TWDeck::FFTC2R(TWDeckWfm* wfm, int size) {
   return;
 }
 
+/**
+ * @details Add the sample `wfm` to the `model` recording both the 
+ * waveform and the spectrum.
+ */
 void TWDeck::Add2Model(TWDeckWfm* wfm, TWDeckWfmModel* model) {
   if (fFFTSize != wfm->GetSize()) BuildFFT(wfm->GetSize());
   FFTR2C(wfm);
@@ -114,6 +175,10 @@ void TWDeck::Add2Model(TWDeckWfm* wfm, TWDeckWfmModel* model) {
   model->AddSpectrum(&wfm->GetWfmRe()[0], &wfm->GetWfmIm()[0]);
 }
 
+/**
+ * @details Resize all filters to have size equal to `filter_size + waveform_size`, 
+ * excepet if the filter is called "Wiener"
+ */
 void TWDeck::ResizeFilters() {
   for (auto &f : fFilters) {
     if (!f.first.Contains("Wiener")) {
@@ -122,6 +187,10 @@ void TWDeck::ResizeFilters() {
   }   
 }
 
+/**
+ * @details Resize the `filter` containers' size to be equal to 
+ * `filter_size + waveform_size`
+ */
 void TWDeck::ResizeFilter(TWDeckWfmFilter* filter) {
   int size_filter = filter->GetSize();
   if (size_filter != size_filter + fSize)
@@ -134,7 +203,17 @@ void TWDeck::ResizeFilter(TWDeckWfmFilter* filter) {
   return;
 }
 
-void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name) {
+/**
+ * @details Apply the filter registered under `filter_name` in #fFilters to 
+ * the waveform `wfm`. If the flag `padding` is active, both the filters 
+ * and the waveform are resize to have size `filter_size + waveform_size` to 
+ * avoid issues due to the boundary conditions of the FFT algorithms.
+ *
+ * @param wfm
+ * @param filter_name
+ * @param padding
+ */
+void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name, bool padding) {
   if ( !(fFilters.count(filter_name) ) ) {
     printf("TWDeck::ApplyFilter ERROR: no filter named '%s' is registered. quit.\n", 
         filter_name.Data());
@@ -149,7 +228,8 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name) {
     ResizeFilter(filter);
   }
 
-  int size_tmp = filter->GetSize() + wfm_tmp.GetSize();
+  int size_tmp = filter->GetSize();
+  if (padding) size_tmp += wfm_tmp.GetSize();
   BuildFFT(size_tmp);
 
   wfm_tmp.SetSize(size_tmp);

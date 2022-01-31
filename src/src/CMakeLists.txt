@@ -3,13 +3,7 @@
 # @file        : CMakeLists
 # @created     : mercoledì gen 26, 2022 11:15:32 CET
 ######################################################################
-message(STATUS "WDECK_INCLUDE_DIR: ${WDECK_INCLUDE_DIR}")
-
-set(HEADER_LIST 
-  "${WDECK_INCLUDE_DIR}/TWDeckWfmFilter.h"
-  "${WDECK_INCLUDE_DIR}/TWDeckWfmModel.h"
-  "${WDECK_INCLUDE_DIR}/TWDeck.h"
-  )
+message(STATUS "${CMAKE_PROJECT_NAME}: Building project libraries")
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # create shared libraries

@@ -2,6 +2,9 @@
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
  * @file        : TWDeckUtils
  * @created     : mercoledì gen 26, 2022 11:37:35 CET
+ *
+ * This file includes a few public utility functions to be 
+ * used in the context of WaveDeck (or outside)
  */
 
 #ifndef TWDECKUTILS_H

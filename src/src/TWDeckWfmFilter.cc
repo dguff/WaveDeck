@@ -8,16 +8,54 @@
 
 ClassImp(TWDeckWfmFilter)
 
+/**
+ * @details Inherited from TWDeckWfm::TWDeckWfm()
+ */
 TWDeckWfmFilter::TWDeckWfmFilter() : TWDeckWfm()
 { }
 
+/**
+ * @details Inherited from TWDeckWfm::TWDeckWfm(int)
+ *
+ * @param N filter waveform size
+ */
 TWDeckWfmFilter::TWDeckWfmFilter(int N) : TWDeckWfm(N) {}
 
+/**
+ * @details Inherited from TWDeckWfm::TWDeckWfm(int, double*)
+ *
+ * @param N filter waveform size
+ * @param x filter waveform values
+ */
 TWDeckWfmFilter::TWDeckWfmFilter(int N, double* x) : TWDeckWfm(N, x) {}
 
+/**
+ * @details Inherited from TWDeckWfm::TWDeckWfm(int, double*, double*)
+ *
+ * @param N filter size
+ * @param re Real parts of filter Fourier components
+ * @param im Imaginary parts of filter Fourier components
+ */
 TWDeckWfmFilter::TWDeckWfmFilter(int N, double* re, double* im) 
   : TWDeckWfm(N, re, im) {}
 
+/**
+ * @details Facilitated constructor implementing some 
+ * pre-defined commonly used filters. The filters 
+ * currently implemented in the WaveDeck package are
+ * called via the dedicated enumerator #wdeck::EFltrShape.
+ * In this particular case, the bandwidth (expressed in ticks)
+ * indicates the different filters' width using the following conventions:
+ * - #wdeck::kSqr: bandwidth = **half** of the square gate length
+ * - #wdeck::kTrngl: bandwidth = **half** of the triangle base
+ * - #wdeck::kGauss: bandiwdth = **sigma** of the Gaussian
+ * - #wdeck::kDiff: bdnwidth = **half** of the flat smoothing gate 
+ *
+ * Note that all the above mentioned filters are normalized. 
+ * @param N Filter waveform size
+ * @param kShape Filter shape 
+ * @param bw Filter bandwidth
+ */
 TWDeckWfmFilter::TWDeckWfmFilter(int N, wdeck::EFltrShape kShape, double bw) {
   SetSize(N);
   if (kShape==wdeck::kSqr) {
@@ -55,6 +93,10 @@ TWDeckWfmFilter::TWDeckWfmFilter(int N, wdeck::EFltrShape kShape, double bw) {
   }
 }
 
+/**
+ * @details Copy constructor partially reimplemented from 
+ * TWDeckWfm::TWDeckWfm(const TWDeckWfm&)
+ */
 TWDeckWfmFilter::TWDeckWfmFilter(const TWDeckWfmFilter& filter) : TWDeckWfm(filter) 
 {
   fBandwidth = filter.fBandwidth;

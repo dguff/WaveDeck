@@ -2,6 +2,7 @@
 /build
 /lib
 /bin
+/docs
 
 # rootlogon
 rootlogon.C

@@ -5,7 +5,7 @@
 ######################################################################
 
 cmake_minimum_required(VERSION 3.4)
-project(WaveDeck)
+project(WaveDeck VERSION 0.1.0)
 
 #------------------------------------------------------------------
 # Setup TODAY
@@ -16,16 +16,20 @@ string(TIMESTAMP TODAY "%Y-%m-%d T%H:%M:%S")
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED COMPONENTS RIO) 
 include(${ROOT_USE_FILE})
+include(ExternalProject)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# configure rootlogon and project path
+# Set project paths
 set(WDECK_LIB_DIR     "${PROJECT_SOURCE_DIR}/lib")
 set(WDECK_BIN_DIR     "${PROJECT_SOURCE_DIR}/bin")
 set(WDECK_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src/include")
+set(WDECK_SOURCE_DIR  "${PROJECT_SOURCE_DIR}/src/src")
+set(WDECK_DOC_DIR     "${PROJECT_SOURCE_DIR}/docs")
+set(WDECK_EXAMPLE_DIR "${PROJECT_SOURCE_DIR}/examples")
 
 #-----------------------------------------------------------------
-# Locate sources and headers for this project
-#
+# Include headers for this project
+
 include_directories(
   ${WDECK_INCLUDE_DIR}
   ${ROOT_INCLUDE_DIRS}
@@ -35,9 +39,9 @@ include_directories(
 add_definitions(${ROOT_CXX_FLAGS})
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# configure rootlogon and project path
-configure_file(src/include/rootlogon.C.in 
-  "${PROJECT_SOURCE_DIR}/examples/rootlogon.C" @ONLY)
+# configure rootlogon, doxygen configuration and project path
+configure_file(${WDECK_INCLUDE_DIR}/rootlogon.C.in 
+  "${WDECK_EXAMPLE_DIR}/rootlogon.C" @ONLY)
 
 # configure package config
 include(CMakePackageConfigHelpers)
@@ -50,19 +54,34 @@ configure_package_config_file(
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # add subdirectory to build WaveDeck libraries
-add_subdirectory(src/src)
+add_subdirectory(${WDECK_SOURCE_DIR})
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add executables 
-SET(CMAKE_INSTALL_RPATH "${WDECK_LIB_DIR}")
-add_executable(wdeck_smoothing examples/example_wdeck_smoothing.cc)
-target_link_libraries(wdeck_smoothing ${ROOT_LIBRARIES} TWDeck )
+add_subdirectory("${WDECK_EXAMPLE_DIR}")
 
-install(TARGETS wdeck_smoothing 
-  LIBRARY DESTINATION "${WDECK_BIN_DIR}"
-  ARCHIVE DESTINATION "${WDECK_BIN_DIR}"
-  RUNTIME DESTINATION "${WDECK_BIN_DIR}"
-)
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Generate documentation using doxygen 
+
+find_package(Doxygen
+  OPTIONAL_COMPONENTS dot mscgen dia)
+ExternalProject_Add(doxygen-awesome-css
+  GIT_REPOSITORY "https://github.com/jothepro/doxygen-awesome-css.git"
+  GIT_TAG "v1.5.0"
+  SOURCE_DIR "${WDECK_DOC_DIR}/ext"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  )
+configure_file(${PROJECT_SOURCE_DIR}/wavedeck-doc.doxy.in 
+  "${WDECK_DOC_DIR}/wavedeck-doc.doxy" @ONLY)
+
+add_custom_target(doc_doxygen ALL
+  COMMAND ${DOXYGEN_EXECUTABLE} "${WDECK_DOC_DIR}/wavedeck-doc.doxy"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  COMMENT "Generating ${CMAKE_PROJECT_NAME} doxygen documentation"
+  VERBATIM)
+add_dependencies(doc_doxygen doxygen-awesome-css)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 
   DESTINATION ${WDECK_BIN_DIR}/WaveDeck/cmake)

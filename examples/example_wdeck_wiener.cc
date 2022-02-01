@@ -2,6 +2,33 @@
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
  * @file        : example_wdeck_wiener
  * @created     : martedì gen 25, 2022 11:47:54 CET
+ *
+ * \page wiener Example of Wiener deconvolution
+ *
+ * This script shows how to use **WaveDeck** to assemble a Wiener filter
+ * and to use it to perform a waveform deconvolution. 
+ * The Wiener filter \f$G(\omega)\f$ is defined as 
+ * \f[
+ * G(\omega) = \frac{H^*(\omega)S(\omega)}{|H(\omega)|^2S(\omega) + N(\omega)}
+ * \f]
+ * where \f$H(\omega)\f$ is the Fourier transform of the impulse response function
+ * while \f$S(\omega)\f$ and \f$N(\omega)\f$ denote the spectral density of the 
+ * original signal and the _mean_ spectral density of the noise respectively. 
+ *
+ * The original signal shape is defined as a very thin Gaussian with standard 
+ * deviation given by 1 tick. 
+ * The original waveform, the impulse response template, the original signal 
+ * shape are treated via the TWDeck interface to compute 
+ * their Fourier transform.
+ * In particular, TWDeck is used to build the noise model described by the 
+ * TWDeckWfmModel class using a sample of simulated noise waveforms. 
+ *
+ * Finally, we compute the Wiener filter and we use TWDeck to perform the waveform 
+ * deconvolution. 
+ *
+ * ![wiener deconvolution example](example_wiener.png)
+ *
+ * \include example_wdeck_wiener.cc
  */
 
 #include <stdio.h>
@@ -63,18 +90,7 @@ int example_wdeck_wiener(int n_p = 2) {
     xv[it] += gRandom->Gaus(0, noise_rms);
   }
 
-  // plot waveform
-  gStyle->SetOptTitle(0);
-  TCanvas* cWaveform = new TCanvas("cWaveform", "waveform", 0, 0, 1400, 600);
-  cWaveform->SetGrid(1, 1); cWaveform->SetTicks(1, 1);
-  cWaveform->SetRightMargin(0.05); cWaveform->SetTopMargin(0.05);
-  TGraph* gW = new TGraph(size, &xt.at(0), xv);
-  gW->SetNameTitle("gWfm", "Original wfm;Time [#mus];Amplitude [a.u.]");
-  gW->SetMarkerStyle(20);
-  gW->SetMarkerColorAlpha(kGray+2, 0.5);
-  gW->Draw("awp");
-
-  TWDeckWfm* wfm_origin = new TWDeckWfm(size, xv);
+    TWDeckWfm* wfm_origin = new TWDeckWfm(size, xv);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
   // B U I L D   W I E N E R   F I L T E R
   //
@@ -113,6 +129,7 @@ int example_wdeck_wiener(int n_p = 2) {
 
   // - - - - - - - - - - - - - - - - - - - - - Assemble the Wiener filter
   TWDeckWfmFilter* wiener = new TWDeckWfmFilter(size);
+  wiener->SetOriginDomain(wdeck::kComplex);
   for (int i=0; i<size; i++) {
     TComplex h  = TComplex::Conjugate(wfm_spe->GetPointComplex(i));
     double   H2 = wfm_spe->GetSpectralDensity(i);
@@ -129,15 +146,27 @@ int example_wdeck_wiener(int n_p = 2) {
   TWDeckWfm* wfm_filtered = new TWDeckWfm(*wfm_origin);
   wdeck.ApplyFilter(wfm_filtered, wiener, false);
   for (auto &v : wfm_filtered->GetWfm()) v /= dt;
-  TGraph* gw_filtered = new TGraph(size, &xt[0], &wfm_filtered->GetWfm()[0]);
-  cWaveform->cd();
-  gw_filtered->Draw("l)");
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
   // P L O T S
   //
+  // - - - - - - - - - - - - - - - - Plot original and post-convolution waveforms
+  gStyle->SetOptTitle(0);
+  TCanvas* cWaveform = new TCanvas("cWaveform", "waveform", 0, 0, 1400, 600);
+  cWaveform->SetGrid(1, 1); cWaveform->SetTicks(1, 1);
+  cWaveform->SetRightMargin(0.05); cWaveform->SetTopMargin(0.05);
+  TGraph* gWfm_origin = new TGraph(size, &xt.at(0), &wfm_origin->GetWfm()[0]);
+  gWfm_origin->SetNameTitle("gWfm", "Original wfm;Time [#mus];Amplitude [a.u.]");
+  gWfm_origin->SetMarkerStyle(20);
+  gWfm_origin->SetMarkerColorAlpha(kGray+2, 0.5);
+  gWfm_origin->Draw("awp");
+  TGraph* gW_filtered = new TGraph(size, &xt[0], &wfm_filtered->GetWfm()[0]);
+  gW_filtered->SetLineColor(kRed+1);
+  gW_filtered->SetLineWidth(2);
+  gW_filtered->Draw("l)");
 
-  //
+
+  // - - - - - - - - - - - - - -  Plot noise model waveform and spectral density
   TCanvas* cNoiseDensity = new TCanvas("cNoiseDensity", "Noise Density plots", 1000, 600);
   cNoiseDensity->Divide(2, 1);
   cNoiseDensity->cd(1);
@@ -155,7 +184,10 @@ int example_wdeck_wiener(int n_p = 2) {
   gwmodel_sptd->SetLineWidth(3); gwmodel_sptd->SetLineWidth(kMagenta+7);
   gwmodel_sptd->Draw("l");
 
-  TCanvas* cSpectralDensity = new TCanvas("cSpectralDensity", "Spectral Density", 0, 0, 800, 600);
+  // - - - - - - - - - - - - - -  Plot the spectral density of the spe response,
+  //                                       noise model and original pulse shape
+  TCanvas* cSpectralDensity = new TCanvas("cSpectralDensity", "Spectral Density", 
+      0, 0, 800, 600);
   cSpectralDensity->SetTicks(1, 1);
   cSpectralDensity->SetGrid(1, 1);
   cSpectralDensity->SetLogy(1);
@@ -167,11 +199,11 @@ int example_wdeck_wiener(int n_p = 2) {
   TGraph* gDspe   = new TGraph(1+0.5*size, &xtick[0], &xDspe  [0]);
   gDdelta->SetName("gDdelta"); gDdelta->SetLineColor(kBlue);
   gDspe  ->SetName("gDspe"  ); gDspe  ->SetLineColor(kRed+1);
-  gDnoise->SetName("gDnois"); gDnoise ->SetLineColor(kGray+2);
+  gDnoise->SetName("gDnois");  gDnoise ->SetLineColor(kGray+2);
 
-  gDspe->Draw("awl");
-  gDdelta->Draw("l");
-  gDnoise->Draw("l");
+  gDspe  ->Draw("awl");
+  gDdelta->Draw(  "l");
+  gDnoise->Draw(  "l");
 
 
   return 0;

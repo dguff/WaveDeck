@@ -14,6 +14,7 @@
 #include "TVirtualFFT.h"
 #include "TGraphErrors.h"
 #include "TH2D.h"
+#include "TWDeckWfm.h"
 #include "TWDeckWfmFilter.h"
 #include "TWDeckWfmModel.h"
 
@@ -60,22 +61,20 @@ class TWDeck : public TObject {
     void FFTC2R(TWDeckWfm* wfm, int size);
 
     //! Register a filter in the filter list
-    void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wdeck::EWfmDomain kDomain = wdeck::kReal);
-    //! Resize all filters
-    void ResizeFilters();
+    void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain = wdeck::kReal);
     //! Set wavedeck size
     void SetSize(int n);
+    //! Resize the filter
+    void ResizeFilter(TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain);
 
 
-  private:
+  protected:
     std::map<TString, TWDeckWfmFilter*> fFilters; //!< Filters register
     TVirtualFFT* fFFT_R2C;      //!< FFT_R2C engine
     TVirtualFFT* fFFT_C2R;      //!< FFT_C2R engine
     int       fSize;            //!< wavedeck size
     int       fFFTSize;         //!< wavedeck FFT size
 
-    //! Resize the filter
-    void      ResizeFilter(TWDeckWfmFilter* filter);
   public:
     ClassDef(TWDeck, 1)
 };

@@ -6,6 +6,7 @@
 
 #include "TWDeck.h"
 #include "TMath.h"
+#include "TWDeckWfm.h"
 #include <utility>
 
 ClassImp(TWDeck)
@@ -48,17 +49,23 @@ TWDeck::~TWDeck()
  * When storing a filter, the used must specify if this in the 
  * time (#wdeck::kReal) or complex (#wdeck::kComplex) domain, so that the missing 
  * representation can be computed. 
- * Before being added to the filters' list, the filter is resized 
+ * If the `padding` option is set true, the filter's values containers 
+ * (i.e. TWDeckWfmFilter#fWfm, TWDeckWfmFilter#fWfm_re, TWDeckWfmFilter#fWfm_im)
+ * are "padded" with zeroes up to size `filter_size + wavedeck_size`. This is 
+ * important if the user wants to avoid circular problems in the waveform 
+ * convolution/deconvolution
  *
  * @param filter_name Filter name (key)
  * @param filter Filter
+ * @param padding Apply waveform padding
  * @param kDomain
  */
-void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, wdeck::EWfmDomain kDomain) {
+void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain ) {
   TWDeckWfmFilter* pdec_filter = new TWDeckWfmFilter(*filter);
-  ResizeFilter(pdec_filter);
+  ResizeFilter(pdec_filter, padding, kDomain);
   int size_tmp = fFFTSize;
-  int size = pdec_filter->GetSize() + fSize;
+  int size = fSize;
+  if (padding) size += filter->GetSize();
   BuildFFT(size);
   if (kDomain == wdeck::kReal) {
     FFTR2C(pdec_filter);
@@ -100,6 +107,7 @@ void TWDeck::FFTR2C(TWDeckWfm* wfm) {
  * has been performed. 
  *
  * @param wfm Waveform to be transformed
+ * @param size Transform size
  */
 void TWDeck::FFTR2C(TWDeckWfm* wfm, int size) {
   int size_fft_tmp = fFFTSize;
@@ -148,6 +156,7 @@ void TWDeck::FFTC2R(TWDeckWfm* wfm) {
  * transform to account for the implementation of the FFT in fftw3.
  *
  * @param wfm Waveform to be transformed
+ * @param size Transform size
  */
 void TWDeck::FFTC2R(TWDeckWfm* wfm, int size) {
   int size_tmp = fFFTSize;
@@ -176,35 +185,43 @@ void TWDeck::Add2Model(TWDeckWfm* wfm, TWDeckWfmModel* model) {
 }
 
 /**
- * @details Resize all filters to have size equal to `filter_size + waveform_size`, 
- * excepet if the filter is called "Wiener"
+ * @details Resize the `filter` containers' size. 
+ * If the option `padding` is true the size will be made equal to 
+ * `filter_size + waveform_size`, otherwise the WaveDeck size #fSize
+ * is imposed
+ *
+ * @param filter Filter to be resized
+ * @param padding Apply padding to filter containers
  */
-void TWDeck::ResizeFilters() {
-  for (auto &f : fFilters) {
-    if (!f.first.Contains("Wiener")) {
-      ResizeFilter(f.second);
-    }
-  }   
-}
-
-/**
- * @details Resize the `filter` containers' size to be equal to 
- * `filter_size + waveform_size`
- */
-void TWDeck::ResizeFilter(TWDeckWfmFilter* filter) {
+void TWDeck::ResizeFilter(TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain) {
   int size_filter = filter->GetSize();
-  if (size_filter != size_filter + fSize)
-  {
-    filter->GetWfm  ().resize(fSize+size_filter, 0.);
-    filter->GetWfmRe().resize(fSize+size_filter, 0.);
-    filter->GetWfmIm().resize(fSize+size_filter, 0.);
+  int size_ = fSize;
+  if (padding) {
+    size_ += size_filter;
   }
+
+  if (size_filter != size_)
+  {
+    filter->GetWfm  ().resize(size_, 0.);
+    filter->GetWfmRe().resize(size_, 0.);
+    filter->GetWfmIm().resize(size_, 0.);
+
+    BuildFFT(size_);
+
+    // re-compute the fourier transform
+    if (kDomain == wdeck::kReal) {
+      FFTR2C(filter);
+    } else if (kDomain == wdeck::kComplex) {
+      FFTC2R(filter);
+    }
+  }
+
   
   return;
 }
 
 /**
- * @details Apply the filter registered under `filter_name` in #fFilters to 
+ * @details Apply the filter registered under `filter_name` in fFilters to 
  * the waveform `wfm`. If the flag `padding` is active, both the filters 
  * and the waveform are resize to have size `filter_size + waveform_size` to 
  * avoid issues due to the boundary conditions of the FFT algorithms.
@@ -225,7 +242,7 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name, bool padding) {
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
     fSize = wfm_tmp.GetSize();
-    ResizeFilter(filter);
+    ResizeFilter(filter, padding, filter->GetOriginDomain());
   }
 
   int size_tmp = filter->GetSize();
@@ -261,12 +278,23 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name, bool padding) {
   return;
 }
 
+/**
+ * @details Apply the `filter` to the waveform `wfm`. 
+ * If the option `padding` is set, then both the waveform and the filter
+ * are padded with zeroes up to a size given by `filter_size + waveform_size`.
+ * Otherwise, the WaveDeck waveform is set as the waveform size and the 
+ * filter size is adjusted without extra padding. 
+ *
+ * @param wfm Waveform to be filtered
+ * @param filter Filter to be applied
+ * @param padding Apply zero padding
+ */
 void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) {
 
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
     fSize = wfm_tmp.GetSize();
-    ResizeFilter(filter);
+    ResizeFilter(filter, padding, filter->GetOriginDomain());
   }
 
   int size_tmp = filter->GetSize();

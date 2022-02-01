@@ -8,14 +8,16 @@
 
 ClassImp(TWDeckWfm)
 
-TWDeckWfm::TWDeckWfm() : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) {}
+TWDeckWfm::TWDeckWfm() : fSize(0), fOriginDomain(wdeck::kReal), 
+  fWfm(0), fWfm_re(0), fWfm_im(0) {}
 
 /**
  * @details Create an empty waveform of size \a N
  *
  * @param N waveform size
  */
-TWDeckWfm::TWDeckWfm(int N) : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+TWDeckWfm::TWDeckWfm(int N) : fSize(0), fOriginDomain(wdeck::kReal), 
+  fWfm(0), fWfm_re(0), fWfm_im(0) 
 {
   SetSize(N);
 }
@@ -27,7 +29,8 @@ TWDeckWfm::TWDeckWfm(int N) : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0)
  * @param N waveform size
  * @param wfm waveform array values
  */
-TWDeckWfm::TWDeckWfm(int N, double* wfm) : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+TWDeckWfm::TWDeckWfm(int N, double* wfm) : fSize(0),  fOriginDomain(wdeck::kReal), 
+  fWfm(0), fWfm_re(0), fWfm_im(0) 
 {
   LoadWave(N, wfm);
 }
@@ -35,7 +38,7 @@ TWDeckWfm::TWDeckWfm(int N, double* wfm) : fSize(0), fWfm(0), fWfm_re(0), fWfm_i
 
 /**
  * @details Create a waveform passing its complex
- * representation as \a N pairs from the #re and #im
+ * representation as \a N pairs from the `re` and `im`
  * arrays as their real and imaginary part.
  *
  * @param N waveform size
@@ -43,7 +46,7 @@ TWDeckWfm::TWDeckWfm(int N, double* wfm) : fSize(0), fWfm(0), fWfm_re(0), fWfm_i
  * @param im imaginary parts of the Fourier components
  */
 TWDeckWfm::TWDeckWfm(int N, double* re, double* im) 
-  : fSize(0), fWfm(0), fWfm_re(0), fWfm_im(0) 
+  : fSize(0), fOriginDomain(wdeck::kComplex), fWfm(0), fWfm_re(0), fWfm_im(0) 
 {
   LoadSpectrum(N, re, im);
 }
@@ -53,6 +56,7 @@ TWDeckWfm::TWDeckWfm(const TWDeckWfm& wfm) : fSize(0), fWfm(0), fWfm_re(0), fWfm
   fName = wfm.fName;
   fTitle = wfm.fTitle;
   fSize = wfm.fSize;
+  fOriginDomain = wfm.fOriginDomain;
   SetSize(fSize);
 
   for (int i=0; i<fSize; i++) {
@@ -113,7 +117,7 @@ void TWDeckWfm::LoadSpectrum(double* re, double* im) {
 }
 
 /**
- * @param n Array size
+ * @param N Array size
  * @param re Real part array
  * @param im Imaginary part array
  */

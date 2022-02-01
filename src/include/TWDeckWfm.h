@@ -20,7 +20,10 @@ namespace wdeck{
   /**
    * @brief Indicates real or complex domain
    */
-  enum EWfmDomain {kReal = 0, kComplex = 1};
+  enum EWfmDomain {
+    kReal = 0,   //!< Real waveform
+    kComplex = 1 //!< Complex waveform
+  };
 }
 
 /**
@@ -92,13 +95,17 @@ class TWDeckWfm : public TNamed {
     //! Get reference to the vector of waveform values 
     std::vector<double>&   GetPointsReal() {return fWfm;}
     //! Set waveform size
-    void                   SetSize(int n);
-
+    void SetSize(int n);
+    //! Get waveform origin type (real/complex)
+    wdeck::EWfmDomain GetOriginDomain() {return fOriginDomain;}
+    //! Set waveform origin type (real/complex)
+    void SetOriginDomain(wdeck::EWfmDomain kDomain) {fOriginDomain = kDomain;}
   protected:
-    int                 fSize;   //!< Waveform size
-    std::vector<double> fWfm;    //!< Waveform values 
-    std::vector<double> fWfm_re; //!< Waveform real part containers
-    std::vector<double> fWfm_im; //!< Waveform imaginary part containers
+    int                 fSize;          //!< Waveform size
+    wdeck::EWfmDomain   fOriginDomain;  //!< Waveform primary domain
+    std::vector<double> fWfm;           //!< Waveform values 
+    std::vector<double> fWfm_re;        //!< Waveform real part containers
+    std::vector<double> fWfm_im;        //!< Waveform imaginary part containers
 
   public:
     ClassDef(TWDeckWfm, 1);

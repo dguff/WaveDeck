@@ -2,6 +2,46 @@
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
  * @file        : example_wdeck_smoothing
  * @created     : martedì gen 25, 2022 11:47:54 CET
+ *
+ * \page Examples
+ * # Examples
+ *
+ * The following scripts showcase a few of the WaveDeck functionalities and 
+ * offers commented examples that hopefully can help integrating WaveDeck
+ * into the user code
+ *
+ * - \subpage convolution
+ * - \subpage wiener
+ *
+ *
+ * \page convolution Example of waveform convolution/smoothing
+ *
+ * Source file: `examples/example_wdeck_smoothing.cc`
+ *
+ * This script shows how to use **WaveDeck** to perform waveform convolution 
+ * using simple filters defined in the time domain. 
+ *
+ * In the code we produce a sysntetic waveform assuming white noise and 
+ * two pulses with an exponential decay. Using the facilitated constructor
+ * of TWDeckWfmFilter::TWDeckWfmFilter(int,wdeck::EFltrShape,double) 
+ * we implement a few pre-defined filters to be applied to the waveform. 
+ * In addition we also build a simple custom filter. 
+ *
+ * The **WaveDeck** interface is then used to perform the waveform 
+ * consolution with the above filters. 
+ *
+ * Note that the filters defined in the constructor of 
+ * TWDeckWfmFilter::TWDeckWfmFilter(int,wdeck::EFltrShape,double) 
+ * are defined as starting at their first point, which will naturally 
+ * induce a time _shift_ in the convolution output. To compensate this 
+ * behaviour, we introduced a TWDeckWfmFilter::fShift member that 
+ * produces an additional _phase shift_ in the convolution which 
+ * correct this effect.
+ *
+ * ![convolution example output](example_convolution.png)
+ *
+ *
+ * \include example_wdeck_smoothing.cc
  */
 
 #include <stdio.h>
@@ -101,7 +141,7 @@ int example_wdeck_smoothing(int n_p = 2) {
   // I N S T A N C E   W D E C K
   TWDeck wdeck(size);
   for (int i=0; i<n_fltr; i++) {
-    wdeck.RegisterFilter(fltr_name[i], filter[i]);
+    wdeck.RegisterFilter(fltr_name[i], filter[i], true);
   }
   
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     

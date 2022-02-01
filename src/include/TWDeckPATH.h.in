@@ -1,0 +1,16 @@
+/**
+ * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
+ * @file        : TWDeckPATH
+ * @created     : martedì feb 01, 2022 09:57:36 CET
+ */
+
+#ifndef TWDECKPATH_H
+
+#define TWDECKPATH_H
+
+#define WDECK_INCLUDE "@WDECK_INCLUDE_DIR@"
+#define WDECK_LIB_DIR "@WDECK_LIB_DIR@"
+
+
+#endif /* end of include guard TWDECKPATH_H */
+

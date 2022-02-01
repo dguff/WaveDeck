@@ -4,8 +4,9 @@
 /bin
 /docs
 
-# rootlogon
+# Automatically generated files
 rootlogon.C
+./src/include/TWDeckPATH.h
 
 # VIM swap files
 *.swp

@@ -42,6 +42,8 @@ add_definitions(${ROOT_CXX_FLAGS})
 # configure rootlogon, doxygen configuration and project path
 configure_file(${WDECK_INCLUDE_DIR}/rootlogon.C.in 
   "${WDECK_EXAMPLE_DIR}/rootlogon.C" @ONLY)
+configure_file(${WDECK_INCLUDE_DIR}/TWDeckPATH.h.in
+  "${WDECK_INCLUDE_DIR}/TWDeckPATH.h")
 
 # configure package config
 include(CMakePackageConfigHelpers)
@@ -65,23 +67,25 @@ add_subdirectory("${WDECK_EXAMPLE_DIR}")
 
 find_package(Doxygen
   OPTIONAL_COMPONENTS dot mscgen dia)
-ExternalProject_Add(doxygen-awesome-css
-  GIT_REPOSITORY "https://github.com/jothepro/doxygen-awesome-css.git"
-  GIT_TAG "v1.5.0"
-  SOURCE_DIR "${WDECK_DOC_DIR}/ext"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-  )
-configure_file(${PROJECT_SOURCE_DIR}/wavedeck-doc.doxy.in 
-  "${WDECK_DOC_DIR}/wavedeck-doc.doxy" @ONLY)
+if (DOXYGEN_FOUND)
+  ExternalProject_Add(doxygen-awesome-css
+    GIT_REPOSITORY "https://github.com/jothepro/doxygen-awesome-css.git"
+    GIT_TAG "v1.5.0"
+    SOURCE_DIR "${WDECK_DOC_DIR}/ext"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    )
+  configure_file(${PROJECT_SOURCE_DIR}/wavedeck-doc.doxy.in 
+    "${WDECK_DOC_DIR}/wavedeck-doc.doxy" @ONLY)
 
-add_custom_target(doc_doxygen ALL
-  COMMAND ${DOXYGEN_EXECUTABLE} "${WDECK_DOC_DIR}/wavedeck-doc.doxy"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMENT "Generating ${CMAKE_PROJECT_NAME} doxygen documentation"
-  VERBATIM)
-add_dependencies(doc_doxygen doxygen-awesome-css)
+  add_custom_target(doc_doxygen ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} "${WDECK_DOC_DIR}/wavedeck-doc.doxy"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating ${CMAKE_PROJECT_NAME} doxygen documentation"
+    VERBATIM)
+  add_dependencies(doc_doxygen doxygen-awesome-css)
+endif()
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 
   DESTINATION ${WDECK_BIN_DIR}/WaveDeck/cmake)

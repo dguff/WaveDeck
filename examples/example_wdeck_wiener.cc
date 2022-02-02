@@ -41,6 +41,7 @@
 #include "TCanvas.h"
 #include "TRandom3.h"
 
+#include "TWDeckPATH.h"
 #include "TWDeckUtils.h"
 #include "TWDeckWfm.h"
 #include "TWDeckWfmFilter.h"
@@ -58,9 +59,7 @@ int example_wdeck_wiener(int n_p = 2) {
   double dt = (t1-t0) / size;
   const double noise_rms = 0.4;
   // D E F I N E   S P E   R E S P O N S E
-  TGraph* gspe_origin = new TGraph("./spe_FBK_4_5.txt");
-  g_scale_Y(gspe_origin, 1e3);
-  g_scale_X(gspe_origin, 1e6);
+  TGraph* gspe_origin = new TGraph(Form("%s/examples/spe_generic_model.txt", WDECK_PROJECT_DIR));
 
   auto spe_response = [gspe_origin](double x) {
     double y = 0;

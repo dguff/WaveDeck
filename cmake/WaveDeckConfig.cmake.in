@@ -6,9 +6,9 @@
 
 @PACKAGE_INIT@
 
-set_and_check(PULSEDEC_INCLUDE_DIR "@PACKAGE_WDECK_INCLUDE_DIR@")
-set_and_check(PULSEDEC_LIB_DIR "@PACKAGE_WDECK_LIB_DIR@")
-set_and_check(PULSEDEC_BIN_DIR "@PACKAGE_WDECK_BIN_DIR@")
+set_and_check(WDECK_INCLUDE_DIR "@PACKAGE_WDECK_INCLUDE_DIR@")
+set_and_check(WDECK_LIB_DIR "@PACKAGE_WDECK_LIB_DIR@")
+set_and_check(WDECK_BIN_DIR "@PACKAGE_WDECK_BIN_DIR@")
 
 check_required_components(WaveDeck)
 

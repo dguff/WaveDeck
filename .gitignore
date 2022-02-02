@@ -6,10 +6,13 @@
 
 # Automatically generated files
 rootlogon.C
-./src/include/TWDeckPATH.h
+/src/include/TWDeckPATH.h
 
 # VIM swap files
 *.swp
+
+# YCM config
+.ycm_extra_conf.py
 
 # Prerequisites
 *.d

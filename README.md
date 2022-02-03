@@ -9,7 +9,29 @@ There are reasonable expecteation for it to work on Linux systems mathcing
 the following requirements:
 
 **Prerequisite**: `cmake` (> 3.4), `ROOT` (> 6.4) compiled with `C++11` standards, 
-typical C++ pysicist's tools
+typical C++ pysicist's tools. It is important that **`ROOT` supports for the 
+`fftw3` libraries**: this typically requires that `fftw3` was installed _before_ 
+`ROOT` was compiled from source. You can check if your `ROOT` supports
+the `fftw3` Fourier transform libriaries by running 
+```
+root-config --has-fftw3
+```
+and/or by checking if you can create an instance of `TVirtualFFT`
+by running in the `ROOT` prompt
+```
+$ int n = 1000;
+$ TVirtualFFT* fft = TVirtualFFT::FFT(1, &n, "R2C M");
+```
+If your `ROOT` installation lacks `fftw3` support, then install the 
+fftw3 from your software manager, the go back in your ROOT build 
+directory and re-run `cmake -DCMAKE_INSTALL_PREFIX=<installdir>`.
+You should see in the `cmake` output a message concerning the `fftw3`
+library. Alternatively, you can use a version of `fftw3` built-in 
+in ROOT whitout installing it on your system. To do so, run 
+```
+cmake -Dbuiltin_fftw3=ON -DCMAKE_INSTALL_PREFIX=<installdir>
+```
+(a working internet connection is required).
 
 **Optional**: `doxygen` for building documentations 
 ```

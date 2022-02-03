@@ -191,18 +191,22 @@ int example_wdeck_wiener(int n_p = 2) {
   cSpectralDensity->SetGrid(1, 1);
   cSpectralDensity->SetLogy(1);
   std::vector<double> xDdelta = wfm_delta->GetSpectralDensityPoints();
-  std::vector<double> xDnoise = wm_noise->GetSpectralDensityPoints();
+  std::vector<double> xDnoise = wm_noise ->GetSpectralDensityPoints();
   std::vector<double> xDspe   = wfm_spe  ->GetSpectralDensityPoints();
+  std::vector<double> xDwiener= wiener   ->GetSpectralDensityPoints();
   TGraph* gDdelta = new TGraph(1+0.5*size, &xtick[0], &xDdelta[0]);
   TGraph* gDnoise = new TGraph(1+0.5*size, &xtick[0], &xDnoise[0]);
   TGraph* gDspe   = new TGraph(1+0.5*size, &xtick[0], &xDspe  [0]);
-  gDdelta->SetName("gDdelta"); gDdelta->SetLineColor(kBlue);
-  gDspe  ->SetName("gDspe"  ); gDspe  ->SetLineColor(kRed+1);
-  gDnoise->SetName("gDnois");  gDnoise ->SetLineColor(kGray+2);
+  TGraph* gDwiener= new TGraph(1+0.5*size, &xtick[0], &xDwiener[0]);
+  gDdelta ->SetName("gDdelta" ); gDdelta ->SetLineColor(kBlue);
+  gDspe   ->SetName("gDspe"   ); gDspe   ->SetLineColor(kRed+1);
+  gDnoise ->SetName("gDnoise" ); gDnoise ->SetLineColor(kGray+2);
+  gDwiener->SetName("gDwiener"); gDwiener->SetLineColor(kGreen+2);
 
-  gDspe  ->Draw("awl");
-  gDdelta->Draw(  "l");
-  gDnoise->Draw(  "l");
+  gDspe   ->Draw("awl");
+  gDdelta ->Draw(  "l");
+  gDnoise ->Draw(  "l");
+  gDwiener->Draw("l");
 
 
   return 0;

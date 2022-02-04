@@ -215,7 +215,6 @@ void TWDeck::ResizeFilter(TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDoma
       FFTC2R(filter);
     }
   }
-
   
   return;
 }
@@ -294,8 +293,8 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) 
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
     fSize = wfm_tmp.GetSize();
-    ResizeFilter(filter, padding, filter->GetOriginDomain());
   }
+  ResizeFilter(filter, padding, filter->GetOriginDomain());
 
   int size_tmp = filter->GetSize();
   if (padding) size_tmp += wfm_tmp.GetSize();

@@ -87,8 +87,8 @@ void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bo
 void TWDeck::FFTR2C(TWDeckWfm* wfm) {
   fFFT_R2C->SetPoints(&wfm->GetWfm().at(0));
   fFFT_R2C->Transform();
-  double xre[50000] = {0};
-  double xim[50000] = {0};
+  double xre[100000] = {0};
+  double xim[100000] = {0};
   fFFT_R2C->GetPointsComplex(xre, xim);
   for (int i=0; i<fFFTSize; i++) {
     wfm->GetWfmRe()[i] = xre[i];
@@ -114,8 +114,8 @@ void TWDeck::FFTR2C(TWDeckWfm* wfm, int size) {
   BuildFFT(size);
   fFFT_R2C->SetPoints(&wfm->GetWfm().at(0));
   fFFT_R2C->Transform();
-  double xre[50000] = {0};
-  double xim[50000] = {0};
+  double xre[100000] = {0};
+  double xim[100000] = {0};
   fFFT_R2C->GetPointsComplex(xre, xim);
   for (int i=0; i<fFFTSize; i++) {
     wfm->GetWfmRe()[i] = xre[i];

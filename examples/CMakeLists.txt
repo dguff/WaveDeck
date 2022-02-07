@@ -12,7 +12,10 @@ target_link_libraries(wdeck_smoothing ${ROOT_LIBRARIES} TWDeck )
 add_executable(wdeck_wiener example_wdeck_wiener.cc)
 target_link_libraries(wdeck_wiener ${ROOT_LIBRARIES} TWDeck )
 
-install(TARGETS wdeck_smoothing  wdeck_wiener
+add_executable(wdeck_producer example_wdeck_waveproducer.cc)
+target_link_libraries(wdeck_producer ${ROOT_LIBRARIES} TWDeck )
+
+install(TARGETS wdeck_smoothing  wdeck_wiener wdeck_producer
   LIBRARY DESTINATION "${WDECK_BIN_DIR}"
   ARCHIVE DESTINATION "${WDECK_BIN_DIR}"
   RUNTIME DESTINATION "${WDECK_BIN_DIR}"

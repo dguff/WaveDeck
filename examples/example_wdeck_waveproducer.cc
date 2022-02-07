@@ -31,6 +31,7 @@
 #include "TCanvas.h"
 #include "TRandom3.h"
 #include "TLegend.h"
+#include "TApplication.h"
 
 #include "TF1.h"
 #include "TWDeck.h"
@@ -189,4 +190,13 @@ std::vector<double> build_spe_response(int size, double t0, double t1) {
   }
 
   return xh;
+}
+
+int main(int argc, char** argv) {
+
+  TApplication* tapp = new TApplication("example_wdeck_waveproducer", &argc, argv);
+  example_wdeck_waveproducer();
+  tapp->Run();
+
+  return 0;
 }

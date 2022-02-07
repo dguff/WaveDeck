@@ -7,6 +7,7 @@
 #include "TWDeck.h"
 #include "TMath.h"
 #include "TWDeckWfm.h"
+#include "TRandom3.h"
 #include <utility>
 
 ClassImp(TWDeck)
@@ -17,7 +18,7 @@ ClassImp(TWDeck)
  */
 TWDeck::TWDeck() : 
   fFFT_R2C(nullptr), fFFT_C2R(nullptr), 
-  fSize(1000), fFFTSize(2000)
+  fSize(1), fFFTSize(1)
 {
   BuildFFT();
 }
@@ -317,6 +318,8 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) 
     TComplex W = TComplex(wfm_tmp.GetWfmRe()[i], wfm_tmp.GetWfmIm()[i]);
   
     TComplex C = W*F;
+    //printf("[%i] %g +i(%g) = [[F]%g +i(%g)] * [[W]%g +i(%g)]\n", 
+       //i, C.Re(), C.Im(), F.Re(), F.Im(), W.Re(), W.Im() );
 
     if (apply_shift) {
       // apply shift to account for filter possible shift
@@ -344,11 +347,49 @@ void TWDeck::SetSize(int n) {
   BuildFFT(fFFTSize);
 }
 
-void TWDeck::BuildFFT(int size) {
+void TWDeck::BuildFFT(int size) 
+{
   fFFTSize = size;
+
   if (fFFT_R2C) {delete fFFT_R2C; fFFT_R2C = nullptr;}
   if (fFFT_C2R) {delete fFFT_C2R; fFFT_C2R = nullptr;}
 
   fFFT_R2C = TVirtualFFT::FFT(1, &fFFTSize, "M R2C K");
   fFFT_C2R = TVirtualFFT::FFT(1, &fFFTSize, "M C2R K");
 }
+
+/**
+ * @details This method produces a waveform with same power spectral 
+ * density of the model. To do so, unitary white noise is filtered with 
+ * with a filter having the same spectral density of the `model` and a constant
+ * phase. 
+ *
+ * @return 
+ */
+TWDeckWfm* TWDeck::Produce(TWDeckWfmModel* model) 
+{
+  printf("TWDeck::Produce\n");
+  const int size = model->GetSize();
+  double ytime[size]; double fre[size]; double fim[size];
+
+  // create white noise waveform
+  for (int i=0; i<size; i++) ytime[i] = gRandom->Gaus(0, 1.);
+  TWDeckWfm* ywfm = new TWDeckWfm(size, ytime);
+  SetSize(size);
+
+  // create filter from model
+  // note that a factor 1/size must be considered to account for 
+  // fftw scaling convention
+  auto vpsd = model->GetSpectralDensityPoints();
+  for (int j=0; j<size; j++) {
+    fre[j] = TMath::Sqrt(vpsd.at(j)/size); 
+    fim[j] = 0.;
+  }
+  TWDeckWfmFilter filter(size, fre, fim);
+
+  //apply the filter
+  ApplyFilter(ywfm, &filter, false);
+
+  return ywfm;
+}
+

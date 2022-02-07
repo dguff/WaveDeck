@@ -60,8 +60,15 @@ class TWDeck : public TObject {
     //! Perform a FFT from Complex to Real on `wfm`
     void FFTC2R(TWDeckWfm* wfm, int size);
 
+    //! Produce sythetic waveform from the model with the same power spectral density
+    TWDeckWfm* Produce(TWDeckWfmModel* model);
+
     //! Register a filter in the filter list
     void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain = wdeck::kReal);
+    //! Get wavedeck size
+    int GetSize() {return fSize;}
+    //! Get wavedeck FFT size
+    int GetFFTSize() {return fFFTSize;}
     //! Set wavedeck size
     void SetSize(int n);
     //! Resize the filter

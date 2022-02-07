@@ -631,7 +631,6 @@ WARN_LOGFILE           =
 INPUT                  = "@WDECK_INCLUDE_DIR@" \
                          "@WDECK_SOURCE_DIR@" \
                          "@WDECK_EXAMPLE_DIR@" \
-                         "@WDECK_EXAMPLE_DIR@/docs_fig" \
                          "@PROJECT_SOURCE_DIR@/README.md"
 
 FILE_PATTERNS          = *.c \

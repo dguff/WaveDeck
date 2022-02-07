@@ -12,6 +12,7 @@
  *
  * - \subpage convolution
  * - \subpage wiener
+ * - \subpage producer
  *
  *
  * \page convolution Example of waveform convolution/smoothing

@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeckUtils
+ * @file        : TWDeckUtils.h
  * @created     : mercoledì gen 26, 2022 11:37:35 CET
  *
  * This file includes a few public utility functions to be 

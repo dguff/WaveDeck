@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeck
+ * @file        : TWDeck.cc
  * @created     : mercoledì gen 26, 2022 12:36:38 CET
  */
 

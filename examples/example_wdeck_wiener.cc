@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : example_wdeck_wiener
+ * @file        : example_wdeck_wiener.cc
  * @created     : martedì gen 25, 2022 11:47:54 CET
  *
  * \page wiener Example of Wiener deconvolution
@@ -206,8 +206,7 @@ int example_wdeck_wiener(int n_p = 2) {
   gDspe   ->Draw("awl");
   gDdelta ->Draw(  "l");
   gDnoise ->Draw(  "l");
-  gDwiener->Draw("l");
-
+  gDwiener->Draw(  "l");
 
   return 0;
 }

@@ -52,6 +52,7 @@ set(TWDeck_resources
 
 foreach(lib IN LISTS TWDeck_libs)
   install(TARGETS ${lib}
+    EXPORT                      WaveDeckTargets
     LIBRARY DESTINATION        "${WDECK_LIB_DIR}" 
     RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
 endforeach()

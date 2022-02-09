@@ -294,7 +294,7 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) 
 
   wfm_tmp.SetSize(size_tmp);
   
-  printf("FFT size is %i\n", fFFTSize);
+  //printf("FFT size is %i\n", fFFTSize);
   FFTR2C(&wfm_tmp);
   
   double fltr_shift = filter->GetShift();

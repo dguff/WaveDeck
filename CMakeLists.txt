@@ -45,15 +45,6 @@ configure_file(${WDECK_INCLUDE_DIR}/rootlogon.C.in
 configure_file(${WDECK_INCLUDE_DIR}/TWDeckPATH.h.in
   "${WDECK_INCLUDE_DIR}/TWDeckPATH.h")
 
-# configure package config
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  cmake/WaveDeckConfig.cmake.in
-  cmake/WaveDeckConfig.cmake
-  INSTALL_DESTINATION "${WDEC_BIN_DIR}/WaveDeck/cmake"
-  PATH_VARS WDECK_LIB_DIR WDECK_BIN_DIR WDECK_INCLUDE_DIR
-  )
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # add subdirectory to build WaveDeck libraries
 add_subdirectory(${WDECK_SOURCE_DIR})
@@ -64,7 +55,6 @@ add_subdirectory("${WDECK_EXAMPLE_DIR}")
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Generate documentation using doxygen 
-
 find_package(Doxygen
   OPTIONAL_COMPONENTS dot mscgen dia)
 if (DOXYGEN_FOUND)
@@ -87,6 +77,18 @@ if (DOXYGEN_FOUND)
   add_dependencies(doc_doxygen doxygen-awesome-css)
 endif()
 
+# configure package config
+export(EXPORT WaveDeckTargets
+  FILE "${WDECK_BIN_DIR}/WaveDeck/cmake/WaveDeckTargets.cmake"
+  NAMESPACE WaveDeck::
+)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  cmake/WaveDeckConfig.cmake.in
+  cmake/WaveDeckConfig.cmake
+  INSTALL_DESTINATION "${WDEC_BIN_DIR}/WaveDeck/cmake"
+  PATH_VARS WDECK_LIB_DIR WDECK_BIN_DIR WDECK_INCLUDE_DIR
+  )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 
   DESTINATION ${WDECK_BIN_DIR}/WaveDeck/cmake)
 

@@ -44,10 +44,10 @@ set(TWDeck_resources
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install instructions
-install(TARGETS TWDeckWfm
+install(TARGETS TWDeckWfm EXPORT WaveDeckTargets
   LIBRARY DESTINATION        "${WDECK_LIB_DIR}"
   RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
-install(TARGETS TWDeck
+install(TARGETS TWDeck EXPORT WaveDeckTargets
   LIBRARY DESTINATION        "${WDECK_LIB_DIR}"
   RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
 

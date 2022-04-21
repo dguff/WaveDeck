@@ -26,6 +26,7 @@ set(WDECK_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src/include")
 set(WDECK_SOURCE_DIR  "${PROJECT_SOURCE_DIR}/src/src")
 set(WDECK_DOC_DIR     "${PROJECT_SOURCE_DIR}/docs")
 set(WDECK_EXAMPLE_DIR "${PROJECT_SOURCE_DIR}/examples")
+set(INSTALL_CMAKE_DIR "${WDECK_LIB_DIR}/cmake/${PROJECT_NAME}")
 
 #-----------------------------------------------------------------
 # Include headers for this project
@@ -52,6 +53,21 @@ add_subdirectory(${WDECK_SOURCE_DIR})
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add executables 
 add_subdirectory("${WDECK_EXAMPLE_DIR}")
+
+# Add libraries targets to the build-tree export set
+export(TARGETS TWDeckWfm TWDeck
+  FILE "${PROJECT_BINARY_DIR}/WaveDeckTargets.cmake")
+
+export(PACKAGE WaveDeck)
+
+# configure package config
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  cmake/WaveDeckConfig.cmake.in
+  cmake/WaveDeckConfig.cmake
+  INSTALL_DESTINATION "${INSTALL_CMAKE_DIR}"
+  PATH_VARS WDECK_LIB_DIR WDECK_BIN_DIR WDECK_INCLUDE_DIR INSTALL_CMAKE_DIR
+  )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Generate documentation using doxygen 
@@ -90,5 +106,7 @@ configure_package_config_file(
   PATH_VARS WDECK_LIB_DIR WDECK_BIN_DIR WDECK_INCLUDE_DIR
   )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 
-  DESTINATION ${WDECK_BIN_DIR}/WaveDeck/cmake)
+  DESTINATION ${INSTALL_CMAKE_DIR})
 
+install(EXPORT WaveDeckTargets DESTINATION
+    "${INSTALL_CMAKE_DIR}")

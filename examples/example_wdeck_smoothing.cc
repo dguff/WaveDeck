@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : example_wdeck_smoothing
+ * @file        : example_wdeck_smoothing.cc
  * @created     : martedì gen 25, 2022 11:47:54 CET
  *
  * \page Examples

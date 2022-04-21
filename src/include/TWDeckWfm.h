@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeckWfm
+ * @file        : TWDeckWfm.h
  * @created     : martedì gen 25, 2022 11:55:43 CET
  *
  */

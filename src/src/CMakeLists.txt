@@ -33,6 +33,14 @@ add_library(TWDeck
   )
 target_link_libraries(TWDeck TWDeckWfm ${ROOT_LIBRARIES})
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Install instructions
+
+set(TWDeck_libs
+  TWDeckWfm 
+  TWDeck
+  )
+
 set(TWDeck_resources 
   ${CMAKE_CURRENT_BINARY_DIR}/TWDeckWfmDict.cxx 
   ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckWfmDict.rootmap 
@@ -42,14 +50,12 @@ set(TWDeck_resources
   ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckDict_rdict.pcm
   )
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Install instructions
-install(TARGETS TWDeckWfm EXPORT WaveDeckTargets
-  LIBRARY DESTINATION        "${WDECK_LIB_DIR}"
-  RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
-install(TARGETS TWDeck EXPORT WaveDeckTargets
-  LIBRARY DESTINATION        "${WDECK_LIB_DIR}"
-  RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
+foreach(lib IN LISTS TWDeck_libs)
+  install(TARGETS ${lib}
+    EXPORT                      WaveDeckTargets
+    LIBRARY DESTINATION        "${WDECK_LIB_DIR}" 
+    RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
+endforeach()
 
 install(FILES ${TWDeck_resources} DESTINATION "${WDECK_LIB_DIR}")
 

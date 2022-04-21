@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeck
+ * @file        : TWDeck.h
  * @created     : mercoledì gen 26, 2022 12:09:47 CET
  */
 
@@ -64,7 +64,9 @@ class TWDeck : public TObject {
     TWDeckWfm* Produce(TWDeckWfmModel* model);
 
     //! Register a filter in the filter list
-    void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain = wdeck::kReal);
+    void RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding);
+    //! Get filter from the register
+    TWDeckWfmFilter* GetFilter(const char* filter_name);
     //! Get wavedeck size
     int GetSize() {return fSize;}
     //! Get wavedeck FFT size

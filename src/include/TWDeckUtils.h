@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeckUtils
+ * @file        : TWDeckUtils.h
  * @created     : mercoledì gen 26, 2022 11:37:35 CET
  *
  * This file includes a few public utility functions to be 
@@ -82,6 +82,25 @@ inline void g_scale_X(TGraph* g, double c) {
   return;
 }
 
+/**
+ * @brief Find the value of x corresponding to a given value of y in the range [x0, x1]
+ *
+ * @param g
+ * @param y
+ * @param x0
+ * @param x1
+ *
+ * @return 
+ */
+inline double g_find_x(TGraph* g, double y, double x0, double x1) {
+  auto fc_g= [g](double *x, double* p) {
+    return p[0]*g->Eval(x[0]);
+  };
+  TF1 f("f", fc_g, x0, x1, 1);
+  f.SetNpx(g->GetN());
+  f.SetParameter(0, 1.);
 
+  return f.GetX(y, x0, x1, 1e-2);
+}
 #endif /* end of include guard TWDECKUTILS_H */
 

@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : example_wdeck_wiener
+ * @file        : example_wdeck_wiener.cc
  * @created     : martedì gen 25, 2022 11:47:54 CET
  *
  * \page wiener Example of Wiener deconvolution
@@ -49,7 +49,7 @@
 #include "TWDeck.h"
 
 
-int example_wdeck_wiener(int n_p = 2) {
+int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
 
   gStyle->SetPalette(kSunset);
 
@@ -89,7 +89,7 @@ int example_wdeck_wiener(int n_p = 2) {
     xv[it] += gRandom->Gaus(0, noise_rms);
   }
 
-    TWDeckWfm* wfm_origin = new TWDeckWfm(size, xv);
+  TWDeckWfm* wfm_origin = new TWDeckWfm(size, xv);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
   // B U I L D   W I E N E R   F I L T E R
   //
@@ -151,63 +151,67 @@ int example_wdeck_wiener(int n_p = 2) {
   //
   // - - - - - - - - - - - - - - - - Plot original and post-convolution waveforms
   gStyle->SetOptTitle(0);
-  TCanvas* cWaveform = new TCanvas("cWaveform", "waveform", 0, 0, 1400, 600);
-  cWaveform->SetGrid(1, 1); cWaveform->SetTicks(1, 1);
-  cWaveform->SetRightMargin(0.05); cWaveform->SetTopMargin(0.05);
-  TGraph* gWfm_origin = new TGraph(size, &xt.at(0), &wfm_origin->GetWfm()[0]);
-  gWfm_origin->SetNameTitle("gWfm", "Original wfm;Time [#mus];Amplitude [a.u.]");
-  gWfm_origin->SetMarkerStyle(20);
-  gWfm_origin->SetMarkerColorAlpha(kGray+2, 0.5);
-  gWfm_origin->Draw("awp");
-  TGraph* gW_filtered = new TGraph(size, &xt[0], &wfm_filtered->GetWfm()[0]);
-  gW_filtered->SetLineColor(kRed+1);
-  gW_filtered->SetLineWidth(2);
-  gW_filtered->Draw("l)");
+  TCanvas* cWaveform = nullptr;
+  TCanvas* cNoiseDensity = nullptr;
+  TCanvas* cSpectralDensity = nullptr;
+  if (do_display) {
+    cWaveform = new TCanvas("cWaveform", "waveform", 0, 0, 1400, 600);
+    cWaveform->SetGrid(1, 1); cWaveform->SetTicks(1, 1);
+    cWaveform->SetRightMargin(0.05); cWaveform->SetTopMargin(0.05);
+    TGraph* gWfm_origin = new TGraph(size, &xt.at(0), &wfm_origin->GetWfm()[0]);
+    gWfm_origin->SetNameTitle("gWfm", "Original wfm;Time [#mus];Amplitude [a.u.]");
+    gWfm_origin->SetMarkerStyle(20);
+    gWfm_origin->SetMarkerColorAlpha(kGray+2, 0.5);
+    gWfm_origin->Draw("awp");
+    TGraph* gW_filtered = new TGraph(size, &xt[0], &wfm_filtered->GetWfm()[0]);
+    gW_filtered->SetLineColor(kRed+1);
+    gW_filtered->SetLineWidth(2);
+    gW_filtered->Draw("l)");
 
 
-  // - - - - - - - - - - - - - -  Plot noise model waveform and spectral density
-  TCanvas* cNoiseDensity = new TCanvas("cNoiseDensity", "Noise Density plots", 1000, 600);
-  cNoiseDensity->Divide(2, 1);
-  cNoiseDensity->cd(1);
-  wm_noise->GetWavefmDensityHist()  ->Draw("colz");
-  TGraph* gwmodel_wave = new TGraph(size, &xtick[0], &wm_noise->GetWfm()[0]);
-  gwmodel_wave->SetLineWidth(3); gwmodel_wave->SetLineWidth(kMagenta+7);
-  gwmodel_wave->Draw("l");
-  cNoiseDensity->cd(2);
-  gPad->SetLogy(1);
-  wm_noise->GetSpectralDensityHist()->DrawClone("colz");
-  std::vector<double> wnoise_sd(0.5*size+1, 0.);
-  int iw=0;
-  for (auto &v : wnoise_sd) {v = wm_noise->GetSpectralDensity(iw); ++iw;}
-  TGraph* gwmodel_sptd = new TGraph(0.5*size+1, &xtick[0], &wnoise_sd[0]);
-  gwmodel_sptd->SetLineWidth(3); gwmodel_sptd->SetLineWidth(kMagenta+7);
-  gwmodel_sptd->Draw("l");
+    // - - - - - - - - - - - - - -  Plot noise model waveform and spectral density
+    cNoiseDensity = new TCanvas("cNoiseDensity", "Noise Density plots", 1000, 600);
+    cNoiseDensity->Divide(2, 1);
+    cNoiseDensity->cd(1);
+    wm_noise->GetWavefmDensityHist()  ->Draw("colz");
+    TGraph* gwmodel_wave = new TGraph(size, &xtick[0], &wm_noise->GetWfm()[0]);
+    gwmodel_wave->SetLineWidth(3); gwmodel_wave->SetLineWidth(kMagenta+7);
+    gwmodel_wave->Draw("l");
+    cNoiseDensity->cd(2);
+    gPad->SetLogy(1);
+    wm_noise->GetSpectralDensityHist()->DrawClone("colz");
+    std::vector<double> wnoise_sd(0.5*size+1, 0.);
+    int iw=0;
+    for (auto &v : wnoise_sd) {v = wm_noise->GetSpectralDensity(iw); ++iw;}
+    TGraph* gwmodel_sptd = new TGraph(0.5*size+1, &xtick[0], &wnoise_sd[0]);
+    gwmodel_sptd->SetLineWidth(3); gwmodel_sptd->SetLineWidth(kMagenta+7);
+    gwmodel_sptd->Draw("l");
 
-  // - - - - - - - - - - - - - -  Plot the spectral density of the spe response,
-  //                                       noise model and original pulse shape
-  TCanvas* cSpectralDensity = new TCanvas("cSpectralDensity", "Spectral Density", 
-      0, 0, 800, 600);
-  cSpectralDensity->SetTicks(1, 1);
-  cSpectralDensity->SetGrid(1, 1);
-  cSpectralDensity->SetLogy(1);
-  std::vector<double> xDdelta = wfm_delta->GetSpectralDensityPoints();
-  std::vector<double> xDnoise = wm_noise ->GetSpectralDensityPoints();
-  std::vector<double> xDspe   = wfm_spe  ->GetSpectralDensityPoints();
-  std::vector<double> xDwiener= wiener   ->GetSpectralDensityPoints();
-  TGraph* gDdelta = new TGraph(1+0.5*size, &xtick[0], &xDdelta[0]);
-  TGraph* gDnoise = new TGraph(1+0.5*size, &xtick[0], &xDnoise[0]);
-  TGraph* gDspe   = new TGraph(1+0.5*size, &xtick[0], &xDspe  [0]);
-  TGraph* gDwiener= new TGraph(1+0.5*size, &xtick[0], &xDwiener[0]);
-  gDdelta ->SetName("gDdelta" ); gDdelta ->SetLineColor(kBlue);
-  gDspe   ->SetName("gDspe"   ); gDspe   ->SetLineColor(kRed+1);
-  gDnoise ->SetName("gDnoise" ); gDnoise ->SetLineColor(kGray+2);
-  gDwiener->SetName("gDwiener"); gDwiener->SetLineColor(kGreen+2);
+    // - - - - - - - - - - - - - -  Plot the spectral density of the spe response,
+    //                                       noise model and original pulse shape
+    cSpectralDensity = new TCanvas("cSpectralDensity", "Spectral Density", 
+        0, 0, 800, 600);
+    cSpectralDensity->SetTicks(1, 1);
+    cSpectralDensity->SetGrid(1, 1);
+    cSpectralDensity->SetLogy(1);
+    std::vector<double> xDdelta = wfm_delta->GetSpectralDensityPoints();
+    std::vector<double> xDnoise = wm_noise ->GetSpectralDensityPoints();
+    std::vector<double> xDspe   = wfm_spe  ->GetSpectralDensityPoints();
+    std::vector<double> xDwiener= wiener   ->GetSpectralDensityPoints();
+    TGraph* gDdelta = new TGraph(1+0.5*size, &xtick[0], &xDdelta[0]);
+    TGraph* gDnoise = new TGraph(1+0.5*size, &xtick[0], &xDnoise[0]);
+    TGraph* gDspe   = new TGraph(1+0.5*size, &xtick[0], &xDspe  [0]);
+    TGraph* gDwiener= new TGraph(1+0.5*size, &xtick[0], &xDwiener[0]);
+    gDdelta ->SetName("gDdelta" ); gDdelta ->SetLineColor(kBlue);
+    gDspe   ->SetName("gDspe"   ); gDspe   ->SetLineColor(kRed+1);
+    gDnoise ->SetName("gDnoise" ); gDnoise ->SetLineColor(kGray+2);
+    gDwiener->SetName("gDwiener"); gDwiener->SetLineColor(kGreen+2);
 
-  gDspe   ->Draw("awl");
-  gDdelta ->Draw(  "l");
-  gDnoise ->Draw(  "l");
-  gDwiener->Draw("l");
-
+    gDspe   ->Draw("awl");
+    gDdelta ->Draw(  "l");
+    gDnoise ->Draw(  "l");
+    gDwiener->Draw(  "l");
+  }
 
   return 0;
 }

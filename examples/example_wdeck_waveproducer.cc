@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : example_wdeck_waveproducer
+ * @file        : example_wdeck_waveproducer.cc
  * @created     : venerdì feb 04, 2022 16:04:31 CET
  *
  *

@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeckLinkDef
+ * @file        : TWDeckLinkDef.h
  * @created     : mercoledì gen 26, 2022 10:20:31 CET
  */
 

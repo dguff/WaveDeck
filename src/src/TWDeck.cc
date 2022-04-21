@@ -1,6 +1,6 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
- * @file        : TWDeck
+ * @file        : TWDeck.cc
  * @created     : mercoledì gen 26, 2022 12:36:38 CET
  */
 
@@ -59,23 +59,35 @@ TWDeck::~TWDeck()
  * @param filter_name Filter name (key)
  * @param filter Filter
  * @param padding Apply waveform padding
- * @param kDomain
  */
-void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain ) {
+void TWDeck::RegisterFilter(const char* filter_name, TWDeckWfmFilter* filter, bool padding) {
   TWDeckWfmFilter* pdec_filter = new TWDeckWfmFilter(*filter);
-  ResizeFilter(pdec_filter, padding, kDomain);
+  ResizeFilter(pdec_filter, padding, filter->GetOriginDomain());
   int size_tmp = fFFTSize;
   int size = fSize;
   if (padding) size += filter->GetSize();
   BuildFFT(size);
-  if (kDomain == wdeck::kReal) {
+  if (filter->GetOriginDomain() == wdeck::kReal) {
     FFTR2C(pdec_filter);
-  } else if (kDomain == wdeck::kComplex) {
+  } else if (filter->GetOriginDomain() == wdeck::kComplex) {
     FFTC2R(pdec_filter);
   }
   fFilters.insert(std::make_pair(filter_name, pdec_filter));
 
   BuildFFT(size_tmp);
+}
+
+TWDeckWfmFilter* TWDeck::GetFilter(const char* filter_name)
+{
+  TWDeckWfmFilter* filter = nullptr;
+  if (fFilters.count(filter_name) == 0) {
+    printf("TWDeck::GetFilter WARNINGN No filter named %s found in the register\n", 
+        filter_name);
+  } else {
+    filter = fFilters.find(filter_name)->second;
+  }
+
+  return filter;
 }
 
 
@@ -195,14 +207,17 @@ void TWDeck::Add2Model(TWDeckWfm* wfm, TWDeckWfmModel* model) {
  * @param padding Apply padding to filter containers
  */
 void TWDeck::ResizeFilter(TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDomain kDomain) {
-  int size_filter = filter->GetSize();
+  int size_filter_vec = filter->GetWfm().size();
+  int size_filter     = filter->GetSize();
   int size_ = fSize;
   if (padding) {
     size_ += size_filter;
   }
 
-  if (size_filter != size_)
+  if (size_filter_vec != size_)
   {
+    printf("TWDeck::ResizeFilter Resizing filter %s %i -> %i\n", 
+        filter->GetName(), size_filter, size_);
     filter->GetWfm  ().resize(size_, 0.);
     filter->GetWfmRe().resize(size_, 0.);
     filter->GetWfmIm().resize(size_, 0.);
@@ -222,9 +237,13 @@ void TWDeck::ResizeFilter(TWDeckWfmFilter* filter, bool padding, wdeck::EWfmDoma
 
 /**
  * @details Apply the filter registered under `filter_name` in fFilters to 
- * the waveform `wfm`. If the flag `padding` is active, both the filters 
- * and the waveform are resize to have size `filter_size + waveform_size` to 
- * avoid issues due to the boundary conditions of the FFT algorithms.
+ * the waveform `wfm`. If the flag `padding` is active, the waveform is resized to 
+ * have to have size `filter_size + waveform_size` in order to
+ * avoid issues due to the boundary conditions of the FFT algorithms. The filter
+ * is also resized if it is defined in the time domain.
+ *
+ * (Note that padding cannot be applied for filters defined in the frequency domain.
+ * In such cases the user must pad the waveform outside TWDeck)
  *
  * @param wfm
  * @param filter_name
@@ -239,51 +258,19 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name, bool padding) {
 
   TWDeckWfmFilter* filter = fFilters.find(filter_name)->second;
 
-  TWDeckWfm wfm_tmp(*wfm);
-  if (fSize !=wfm_tmp.GetSize()) {
-    fSize = wfm_tmp.GetSize();
-    ResizeFilter(filter, padding, filter->GetOriginDomain());
-  }
-
-  int size_tmp = filter->GetSize();
-  if (padding) size_tmp += wfm_tmp.GetSize();
-  BuildFFT(size_tmp);
-
-  wfm_tmp.SetSize(size_tmp);
-  
-  FFTR2C(&wfm_tmp);
-
-  double fltr_shift = filter->GetShift();
-  bool apply_shift = !(fltr_shift == 0);
-  for (int i = 0; i < size_tmp; i++) {
-    TComplex F = TComplex(filter->GetWfmRe()[i], filter->GetWfmIm()[i]);
-    TComplex W = TComplex(wfm_tmp.GetWfmRe()[i], wfm_tmp.GetWfmIm()[i]);
-  
-    TComplex C = W*F;
-    if (apply_shift) {
-      // apply shift to account for filter possible shift
-      TComplex ph = TComplex(0., +TMath::TwoPi()*i*filter->GetShift()/fFFTSize);
-      C = C * TComplex::Exp(ph);
-    }
-    wfm_tmp.GetWfmRe()[i] = C.Re();
-    wfm_tmp.GetWfmIm()[i] = C.Im();
-  }
-
-  FFTC2R(&wfm_tmp);
-  
-  for (int i=0; i<wfm->GetSize(); i++) {
-    wfm->GetWfm()[i] = wfm_tmp.GetWfm().at(i);
-  }
-
-  return;
+  ApplyFilter(wfm, filter, padding);
 }
 
 /**
  * @details Apply the `filter` to the waveform `wfm`. 
- * If the option `padding` is set, then both the waveform and the filter
- * are padded with zeroes up to a size given by `filter_size + waveform_size`.
+ * If the option `padding` is set, then the waveform
+ * is padded with zeroes up to a size given by `filter_size + waveform_size` 
+ * (the filter is also padded _only if_ it is defined in the time domain).
  * Otherwise, the WaveDeck waveform is set as the waveform size and the 
  * filter size is adjusted without extra padding. 
+ *
+ * (Note that padding cannot be applied for filters defined in the frequency domain.
+ * In such cases the user must pad the waveform outside TWDeck)
  *
  * @param wfm Waveform to be filtered
  * @param filter Filter to be applied
@@ -293,17 +280,21 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) 
 
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
+    printf("TWDeck::ApplyFilter Adapt wavedeck size to wfm. New size is %i.\n",
+        wfm_tmp.GetSize());
     fSize = wfm_tmp.GetSize();
   }
-  ResizeFilter(filter, padding, filter->GetOriginDomain());
 
-  int size_tmp = filter->GetSize();
-  if (padding) size_tmp += wfm_tmp.GetSize();
+  if (filter->GetOriginDomain() == wdeck::kReal)
+    ResizeFilter(filter, padding, filter->GetOriginDomain());
+
+  int size_tmp = fSize;
+  if (padding) size_tmp += filter->GetSize();
   BuildFFT(size_tmp);
 
   wfm_tmp.SetSize(size_tmp);
   
-  printf("FFT size is %i\n", fFFTSize);
+  //printf("FFT size is %i\n", fFFTSize);
   FFTR2C(&wfm_tmp);
   
   double fltr_shift = filter->GetShift();
@@ -312,20 +303,19 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) 
   int nloop = 0.5*size_tmp+1; 
   if (padding) nloop = size_tmp;
 
-
   for (int i = 0; i < nloop; i++) {
     TComplex F = TComplex(filter->GetWfmRe()[i], filter->GetWfmIm()[i]);
     TComplex W = TComplex(wfm_tmp.GetWfmRe()[i], wfm_tmp.GetWfmIm()[i]);
   
     TComplex C = W*F;
-    //printf("[%i] %g +i(%g) = [[F]%g +i(%g)] * [[W]%g +i(%g)]\n", 
-       //i, C.Re(), C.Im(), F.Re(), F.Im(), W.Re(), W.Im() );
 
     if (apply_shift) {
       // apply shift to account for filter possible shift
       TComplex ph = TComplex(0., +TMath::TwoPi()*i*filter->GetShift()/fFFTSize);
       C = C * TComplex::Exp(ph);
-    }
+      //printf("[%i] %g +i(%g) = [[F]%g +i(%g)] * [[W]%g +i(%g)] + shift\n", 
+          //i, C.Re(), C.Im(), F.Re(), F.Im(), W.Re(), W.Im() );
+    } 
 
     wfm_tmp.GetWfmRe()[i] = C.Re();
     wfm_tmp.GetWfmIm()[i] = C.Im();

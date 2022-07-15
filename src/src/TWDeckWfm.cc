@@ -163,9 +163,11 @@ double TWDeckWfm::GetSpectralDensity(int i) {
  * density (i.e. the squared modulus) of the waveform Fourier components
  */
 std::vector<double> TWDeckWfm::GetSpectralDensityPoints() {
-  std::vector<double> rho2(fSize*0.5+1, 0.);
-  for (int i=0; i<fSize*0.5+1; i++)
+  size_t _size = fSize*0.5 + 1;
+  std::vector<double> rho2(_size, 0.);
+  for (int i=0; i<_size; i++) {
     rho2.at(i) = GetSpectralDensity(i);
+  }
   return rho2;
 }
 

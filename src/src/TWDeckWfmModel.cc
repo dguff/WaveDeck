@@ -117,8 +117,10 @@ void TWDeckWfmModel::BuildSpectralDensity(double* xre, double* xim) {
   double ymax = *(std::max_element(vmag.begin(), vmag.end()));
   double ymin = *(std::min_element(vmag.begin(), vmag.end()));
 
+  size_t _size = fSize*0.5; 
+
   if (ymin == 0) ymin = 1e-3;
-  std::vector<double> xbins = linspace(0., (double)fSize*0.5, fSize*0.5+2);
+  std::vector<double> xbins = linspace(0., (double)_size, _size+2);
   std::vector<double> ybins_ex = linspace(0.8*log10(ymin), 1.2*log10(ymax), 51);
   std::vector<double> ybins(ybins_ex);
   for (auto &v : ybins) v = TMath::Power(10., v);
@@ -126,7 +128,7 @@ void TWDeckWfmModel::BuildSpectralDensity(double* xre, double* xim) {
   fSpectralDensityHist = new TH2D(
       Form("%s_sdensity", fName.Data()), 
       Form("%s spectral density", fTitle.Data()), 
-      fSize*0.5+1, &xbins[0], 50, &ybins[0]);
+      _size+1, &xbins[0], 50, &ybins[0]);
   return;
 }
 

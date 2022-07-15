@@ -87,7 +87,7 @@ class TWDeckWfm : public TNamed {
     inline double         
       GetPointReal(int i) {return fWfm.at(i);}
     //! Get spectral density    
-    double GetSpectralDensity(int i);
+    virtual double GetSpectralDensity(int i);
     //! Get vector of spectral density values    
     std::vector<double>    GetSpectralDensityPoints();
     //! Get vector of Fourier coefficients    

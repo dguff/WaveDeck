@@ -9,7 +9,7 @@ There are reasonable expecteation for it to work on Linux systems mathcing
 the following requirements:
 
 **Prerequisite**: `cmake` (> 3.4), `ROOT` (> 6.4) compiled with `C++11` standards, 
-typical C++ pysicist's tools. It is important that **`ROOT` supports for the 
+typical C++ physicist's tools. It is important that **`ROOT` supports for the 
 `fftw3` libraries**: this typically requires that `fftw3` was installed _before_ 
 `ROOT` was compiled from source. You can check if your `ROOT` supports
 the `fftw3` Fourier transform libriaries by running 

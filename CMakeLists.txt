@@ -20,7 +20,7 @@ include(ExternalProject)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set project paths
-set(WDECK_BIN_DIR     "${CMAKE_INSTALL_PREFIX}")
+get_filename_component(WDECK_BIN_DIR "${CMAKE_INSTALL_PREFIX}" ABSOLUTE)
 set(WDECK_LIB_DIR     "${WDECK_BIN_DIR}/lib")
 set(WDECK_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src/include")
 set(WDECK_SOURCE_DIR  "${PROJECT_SOURCE_DIR}/src/src")

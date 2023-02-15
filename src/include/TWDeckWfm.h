@@ -89,7 +89,7 @@ class TWDeckWfm : public TNamed {
     //! Get spectral density    
     virtual double GetSpectralDensity(int i);
     //! Get vector of spectral density values    
-    std::vector<double>    GetSpectralDensityPoints();
+    virtual std::vector<double>    GetSpectralDensityPoints();
     //! Get vector of Fourier coefficients    
     std::vector<TComplex>  GetPointsComplex();
     //! Get reference to the vector of waveform values 
@@ -106,6 +106,8 @@ class TWDeckWfm : public TNamed {
     std::vector<double> fWfm;           //!< Waveform values 
     std::vector<double> fWfm_re;        //!< Waveform real part containers
     std::vector<double> fWfm_im;        //!< Waveform imaginary part containers
+
+    friend class TWDeckWfmAnalysis;
 
   public:
     ClassDef(TWDeckWfm, 1);

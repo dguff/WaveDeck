@@ -9,11 +9,15 @@ message(STATUS "${CMAKE_PROJECT_NAME}: Building project libraries")
 # create shared libraries
 ROOT_GENERATE_DICTIONARY(TWDeckWfmDict
   "${WDECK_INCLUDE_DIR}/TWDeckWfm.h"
+  "${WDECK_INCLUDE_DIR}/TWDeckWfmAnalysis.h"
   LINKDEF
   ${WDECK_INCLUDE_DIR}/TWDeckWfmLinkDef.h
   )
 add_library(TWDeckWfm
-  SHARED ${WaveDeck_SOURCE_DIR}/src/src/TWDeckWfm.cc TWDeckWfmDict.cxx)
+  SHARED 
+  ${WaveDeck_SOURCE_DIR}/src/src/TWDeckWfm.cc 
+  ${WaveDeck_SOURCE_DIR}/src/src/TWDeckWfmAnalysis.cc 
+  TWDeckWfmDict.cxx)
 target_link_libraries(TWDeckWfm ${ROOT_LIBRARIES})
 
 

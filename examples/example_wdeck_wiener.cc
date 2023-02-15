@@ -57,7 +57,7 @@ int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
   const double t0 =  0.0;
   const double t1 = 50.0;
   double dt = (t1-t0) / size;
-  const double noise_rms = 0.4;
+  const double noise_rms = 0.1;
   // D E F I N E   S P E   R E S P O N S E
   TGraph* gspe_origin = new TGraph(Form("%s/examples/spe_generic_model.txt", WDECK_PROJECT_DIR));
 
@@ -117,9 +117,7 @@ int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
   //
   // - - - - - - - - - - - - - - - - - - -  create template for the delta 
   double delta_xv[size] = {0};
-  double delta_offset = 1000.;
-  for (int i=0; i<size; i++) 
-    delta_xv[i] = TMath::Gaus(i, delta_offset, 1., true);
+  delta_xv[0] = 1.0; 
   TWDeckWfm* wfm_delta = new TWDeckWfm(size, delta_xv);
 
   // - - - - - - - - - - Use WaveDeck to compute the FFT of the templates

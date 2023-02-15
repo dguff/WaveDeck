@@ -152,9 +152,9 @@ void TWDeck::FFTC2R(TWDeckWfm* wfm) {
   fFFT_C2R->Transform();
   double* v = fFFT_C2R->GetPointsReal();
   double scale_ = 1./fFFTSize;
-  for (int j=0; j<wfm->GetSize(); j++)
+  for (int j=0; j<wfm->GetSize(); j++) {
     wfm->GetWfm().at(j) = v[j] * scale_;
-
+  }
   return;
 }
 
@@ -278,6 +278,9 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TString filter_name, bool padding) {
  */
 void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) {
 
+  const int fftsize_origin = fFFTSize; 
+  const int size_origin = fSize; 
+
   TWDeckWfm wfm_tmp(*wfm);
   if (fSize !=wfm_tmp.GetSize()) {
     printf("TWDeck::ApplyFilter Adapt wavedeck size to wfm. New size is %i.\n",
@@ -327,14 +330,15 @@ void TWDeck::ApplyFilter(TWDeckWfm* wfm, TWDeckWfmFilter* filter, bool padding) 
     wfm->GetWfm()[i] = wfm_tmp.GetWfm().at(i);
   }
 
+  if (fSize != size_origin) fSize = size_origin; 
+  if (fFFTSize != fftsize_origin) BuildFFT(fftsize_origin); 
+
   return;
 }
 
 void TWDeck::SetSize(int n) {
-  fSize    = n;
-  fFFTSize = n;
-
-  BuildFFT(fFFTSize);
+  fSize = n; 
+  BuildFFT(n);
 }
 
 void TWDeck::BuildFFT(int size) 

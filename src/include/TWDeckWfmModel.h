@@ -59,9 +59,9 @@ class TWDeckWfmModel : public TWDeckWfm {
     //! Get the model spectrum sample size
     inline int   GetNSampleSpectrum() {return fNSampleSpectrum;}
     //! Return the i-th Fourier component spectral density
-    inline double GetSpectralDensity(int i) {return fSpectralDensity.at(i);}
+    double GetSpectralDensity(int i) override  {return fSpectralDensity.at(i);} 
     //! Return the Fourier components spectral density
-    inline std::vector<double> GetSpectralDensityPoints() {return fSpectralDensity;}
+    std::vector<double> GetSpectralDensityPoints() override {return fSpectralDensity;}
 
     //! Set waveform model size
     void  SetSize(int n);

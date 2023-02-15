@@ -64,27 +64,27 @@ export(PACKAGE WaveDeck)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Generate documentation using doxygen 
-find_package(Doxygen
-  OPTIONAL_COMPONENTS dot mscgen dia)
-if (DOXYGEN_FOUND)
-  ExternalProject_Add(doxygen-awesome-css
-    GIT_REPOSITORY "https://github.com/jothepro/doxygen-awesome-css.git"
-    GIT_TAG "v1.5.0"
-    SOURCE_DIR "${WDECK_DOC_DIR}/ext"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    )
-  configure_file(${PROJECT_SOURCE_DIR}/wavedeck-doc.doxy.in 
-    "${WDECK_DOC_DIR}/wavedeck-doc.doxy" @ONLY)
-
-  add_custom_target(doc_doxygen ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} "${WDECK_DOC_DIR}/wavedeck-doc.doxy"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating ${CMAKE_PROJECT_NAME} doxygen documentation"
-    VERBATIM)
-  add_dependencies(doc_doxygen doxygen-awesome-css)
-endif()
+#find_package(Doxygen
+#  OPTIONAL_COMPONENTS dot mscgen dia)
+#if (DOXYGEN_FOUND)
+#  ExternalProject_Add(doxygen-awesome-css
+#    GIT_REPOSITORY "https://github.com/jothepro/doxygen-awesome-css.git"
+#    GIT_TAG "v1.5.0"
+#    SOURCE_DIR "${WDECK_DOC_DIR}/ext"
+#    CONFIGURE_COMMAND ""
+#    BUILD_COMMAND ""
+#    INSTALL_COMMAND ""
+#    )
+#  configure_file(${PROJECT_SOURCE_DIR}/wavedeck-doc.doxy.in 
+#    "${WDECK_DOC_DIR}/wavedeck-doc.doxy" @ONLY)
+#
+#  add_custom_target(doc_doxygen ALL
+#    COMMAND ${DOXYGEN_EXECUTABLE} "${WDECK_DOC_DIR}/wavedeck-doc.doxy"
+#    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+#    COMMENT "Generating ${CMAKE_PROJECT_NAME} doxygen documentation"
+#    VERBATIM)
+#  add_dependencies(doc_doxygen doxygen-awesome-css)
+#endif()
 
 # configure package config
 include(CMakePackageConfigHelpers)

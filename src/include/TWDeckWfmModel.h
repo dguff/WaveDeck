@@ -78,7 +78,7 @@ class TWDeckWfmModel : public TWDeckWfm {
     void  BuildSpectralDensity(double* xre, double* xim);
 
   public:
-    ClassDef(TWDeckWfmModel, 1);
+    ClassDefOverride(TWDeckWfmModel, 1);
 };
 
 

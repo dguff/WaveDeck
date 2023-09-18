@@ -72,7 +72,7 @@ inline void g_scale_Y(TGraph* g, double c) {
 /**
  * @brief Scale all the X-points of a `TGraph`
  *
- * @param g targer `TGraph`
+ * @param g target `TGraph`
  * @param c scale factor
  */
 inline void g_scale_X(TGraph* g, double c) {

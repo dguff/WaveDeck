@@ -7,33 +7,39 @@ message(STATUS "${CMAKE_PROJECT_NAME}: Building project libraries")
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # create shared libraries
-ROOT_GENERATE_DICTIONARY(TWDeckWfmDict
-  "${WDECK_INCLUDE_DIR}/TWDeckWfm.h"
-  LINKDEF
-  ${WDECK_INCLUDE_DIR}/TWDeckWfmLinkDef.h
-  )
 add_library(TWDeckWfm
   SHARED 
-  ${WaveDeck_SOURCE_DIR}/src/src/TWDeckWfm.cc 
-  TWDeckWfmDict.cxx)
-target_link_libraries(TWDeckWfm ${ROOT_LIBRARIES})
+  ${WDECK_SOURCE_DIR}/TWDeckWfm.cc 
+  ${WDECK_INCLUDE_DIR}/TWDeckWfm.h
+  )
+
+target_link_libraries(TWDeckWfm PUBLIC ${ROOT_LIBRARIES})
+
+ROOT_GENERATE_DICTIONARY(G__TWDeckWfm
+  ${WDECK_INCLUDE_DIR}/TWDeckWfm.h
+  MODULE TWDeckWfm
+  LINKDEF ${WDECK_INCLUDE_DIR}/TWDeckWfmLinkDef.h
+  )
 
 
-ROOT_GENERATE_DICTIONARY(TWDeckDict
+add_library(TWDeck
+  SHARED
+  ${WDECK_SOURCE_DIR}/TWDeckWfmFilter.cc 
+  ${WDECK_INCLUDE_DIR}/TWDeckWfmFilter.h
+  ${WDECK_SOURCE_DIR}/TWDeckWfmModel.cc 
+  ${WDECK_INCLUDE_DIR}/TWDeckWfmModel.h
+  ${WDECK_SOURCE_DIR}/TWDeck.cc
+  ${WDECK_INCLUDE_DIR}/TWDeck.h
+  )
+target_link_libraries(TWDeck PUBLIC TWDeckWfm ${ROOT_LIBRARIES})
+
+ROOT_GENERATE_DICTIONARY(G__TWDeck
   ${WDECK_INCLUDE_DIR}/TWDeckWfmFilter.h
   ${WDECK_INCLUDE_DIR}/TWDeckWfmModel.h
   ${WDECK_INCLUDE_DIR}/TWDeck.h
-  LINKDEF
-  ${WDECK_INCLUDE_DIR}/TWDeckLinkDef.h
+  MODULE TWDeck
+  LINKDEF ${WDECK_INCLUDE_DIR}/TWDeckLinkDef.h
   )
-add_library(TWDeck
-  SHARED
-  ${WaveDeck_SOURCE_DIR}/src/src/TWDeckWfmFilter.cc 
-  ${WaveDeck_SOURCE_DIR}/src/src/TWDeckWfmModel.cc 
-  ${WaveDeck_SOURCE_DIR}/src/src/TWDeck.cc
-  TWDeckDict.cxx
-  )
-target_link_libraries(TWDeck TWDeckWfm ${ROOT_LIBRARIES})
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Install instructions
@@ -44,12 +50,12 @@ set(TWDeck_libs
   )
 
 set(TWDeck_resources 
-  ${CMAKE_CURRENT_BINARY_DIR}/TWDeckWfmDict.cxx 
-  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckWfmDict.rootmap 
-  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckWfmDict_rdict.pcm
-  ${CMAKE_CURRENT_BINARY_DIR}/TWDeckDict.cxx 
-  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckDict.rootmap 
-  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckDict_rdict.pcm
+  ${CMAKE_CURRENT_BINARY_DIR}/G__TWDeckWfm.cxx 
+  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckWfm.rootmap 
+  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeckWfm_rdict.pcm
+  ${CMAKE_CURRENT_BINARY_DIR}/G__TWDeck.cxx 
+  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeck.rootmap 
+  ${CMAKE_CURRENT_BINARY_DIR}/libTWDeck_rdict.pcm
   )
 
 foreach(lib IN LISTS TWDeck_libs)

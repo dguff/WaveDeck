@@ -40,9 +40,9 @@ sudo apt install doxygen doxygen-doc doxygen-gui graphviz
 
 To install this package simply clone it and build it using `cmake`
 ```
-$ mkdir build
+$ mkdir build install
 $ cd build/
-$ cmake ..
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/install/directory ..
 $ make 
 $ make install
 ```

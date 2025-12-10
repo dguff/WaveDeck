@@ -85,10 +85,10 @@ inline void g_scale_X(TGraph* g, double c) {
 /**
  * @brief Find the value of x corresponding to a given value of y in the range [x0, x1]
  *
- * @param g
- * @param y
- * @param x0
- * @param x1
+ * @param g target `TGraph`
+ * @param y target y value
+ * @param x0 lower bound
+ * @param x1 upper bound
  *
  * @return 
  */

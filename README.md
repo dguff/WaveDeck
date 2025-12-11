@@ -2,6 +2,8 @@
 
 A command deck for ROOT-based digital pulse-processing
 
+![root:6.32.02-ubuntu22.04](https://github.com/dguff/WaveDeck/actions/workflows/cmake_test.yml/badge.svg)
+
 ## Installation
 
 DISCLAIMER: this code hasn't been tested at all yet. 

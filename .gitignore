@@ -1,14 +1,17 @@
 # Build directories
 /build
+/install
 /lib
 /bin
 /docs
+/.cache
 
 # Automatically generated files
 rootlogon.C
 /src/include/TWDeckPATH.h
 
 # VIM swap files
+/.vim
 *.swp
 
 # YCM config

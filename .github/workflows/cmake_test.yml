@@ -1,17 +1,20 @@
-name: WaveDeck CI (ROOT)
+name: CI-test root:6.32.02-ubuntu22.04
 
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main", "master" ]
+    types: [labeled]
   workflow_dispatch:
 
 jobs:
   build-and-test:
     name: Build and Test in ROOT Container
     
-    if: ${{ github.actor == github.repository_owner }}
+    if: >
+      (github.actor == github.repository_owner) || 
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-tests')
+      
     
     runs-on: ubuntu-latest
     
@@ -19,6 +22,13 @@ jobs:
       image: rootproject/root:6.32.02-ubuntu22.04
 
     steps:
+    - name: Reset Label
+      if: github.event_name == 'pull_request'
+      uses: actions-ecosystem/action-remove-labels@v1
+      with:
+        labels: 'run-tests'
+      continue-on-error: true
+    
     - name: Checkout Repository
       uses: actions/checkout@v4
 

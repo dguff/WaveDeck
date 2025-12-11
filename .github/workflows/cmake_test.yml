@@ -1,0 +1,39 @@
+name: WaveDeck CI (ROOT)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test in ROOT Container
+    
+    if: ${{ github.actor == github.repository_owner }}
+    
+    runs-on: ubuntu-latest
+    
+    container:
+      image: rootproject/root:6.32.02-ubuntu22.04
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: CMake configuration
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+
+    - name: Compile WaveDeck
+      run: |
+        cd build
+        cmake --build . 
+
+    - name: Run Tests
+      run: |
+        cd build
+        ctest --output-on-failure

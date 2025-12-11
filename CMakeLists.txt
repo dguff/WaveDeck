@@ -4,7 +4,7 @@
 # @created     : mercoledì gen 26, 2022 09:27:35 CET
 ######################################################################
 
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.14)
 project(WaveDeck VERSION 0.1.0)
 
 #------------------------------------------------------------------
@@ -61,6 +61,11 @@ export(TARGETS TWDeckWfm TWDeck
   FILE "${PROJECT_BINARY_DIR}/WaveDeckTargets.cmake")
 
 export(PACKAGE WaveDeck)
+
+#-----------------------------------------------------------------
+# Unit Testing
+enable_testing()
+add_subdirectory(tests)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Generate documentation using doxygen 

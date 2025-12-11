@@ -47,7 +47,7 @@ TEST(TWDeckWfmTest, SetSizeChangesVectors) {
   ASSERT_EQ(wfm.GetWfm().size(), NewN);
   ASSERT_EQ(wfm.GetWfmIm().size(), NewN);
 
-  // Verifica che i nuovi elementi siano azzerati
+  // Verify that the new elements are zeroed
   for (int i = 0; i < NewN; ++i) {
     EXPECT_DOUBLE_EQ(wfm.GetPointReal(i), 0.0);
   }

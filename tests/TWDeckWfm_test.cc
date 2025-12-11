@@ -101,7 +101,7 @@ TEST(TWDeckWfmTest, LoadSpectrumInitializesComplexPart) {
   double im_data[] = {0.5, 9.9};
   TWDeckWfm wfm;
 
-  // 2. Act: Usa il metodo con la dimensione
+  // 2. Act: Use the method with the size
   wfm.LoadSpectrum(N, re_data, im_data);
   wfm.SetOriginDomain(kComplex); 
 

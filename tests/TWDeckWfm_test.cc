@@ -109,7 +109,7 @@ TEST(TWDeckWfmTest, LoadSpectrumInitializesComplexPart) {
   ASSERT_EQ(wfm.GetSize(), N);
   ASSERT_EQ(wfm.GetOriginDomain(), kComplex);
 
-  // Verifica i coefficienti complessi
+  // Verify the complex coefficients
   TComplex c0 = wfm.GetPointComplex(0);
   TComplex c1 = wfm.GetPointComplex(1);
 

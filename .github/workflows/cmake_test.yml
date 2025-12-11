@@ -13,7 +13,7 @@ jobs:
     
     if: ${{ github.actor == github.repository_owner }}
     
-    runs-on: ubuntu22.04
+    runs-on: ubuntu-latest
     
     container:
       image: rootproject/root:6.32.02-ubuntu22.04

@@ -47,7 +47,7 @@ TEST(TWDeckWfmTest, SetSizeChangesVectors) {
   ASSERT_EQ(wfm.GetWfm().size(), NewN);
   ASSERT_EQ(wfm.GetWfmIm().size(), NewN);
 
-  // Verifica che i nuovi elementi siano azzerati
+  // Verify that the new elements are zeroed
   for (int i = 0; i < NewN; ++i) {
     EXPECT_DOUBLE_EQ(wfm.GetPointReal(i), 0.0);
   }
@@ -101,7 +101,7 @@ TEST(TWDeckWfmTest, LoadSpectrumInitializesComplexPart) {
   double im_data[] = {0.5, 9.9};
   TWDeckWfm wfm;
 
-  // 2. Act: Usa il metodo con la dimensione
+  // 2. Act: Use the method with the size
   wfm.LoadSpectrum(N, re_data, im_data);
   wfm.SetOriginDomain(kComplex); 
 
@@ -109,7 +109,7 @@ TEST(TWDeckWfmTest, LoadSpectrumInitializesComplexPart) {
   ASSERT_EQ(wfm.GetSize(), N);
   ASSERT_EQ(wfm.GetOriginDomain(), kComplex);
 
-  // Verifica i coefficienti complessi
+  // Verify the complex coefficients
   TComplex c0 = wfm.GetPointComplex(0);
   TComplex c1 = wfm.GetPointComplex(1);
 

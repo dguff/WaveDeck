@@ -362,7 +362,6 @@ void TWDeck::BuildFFT(int size)
  */
 TWDeckWfm* TWDeck::Produce(TWDeckWfmModel* model) 
 {
-  printf("TWDeck::Produce\n");
   const int size = model->GetSize();
   double ytime[size]; double fre[size]; double fim[size];
 

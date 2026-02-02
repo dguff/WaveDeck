@@ -13,6 +13,7 @@
  * - \subpage convolution
  * - \subpage wiener
  * - \subpage producer
+ * - \subpage noise
  *
  *
  * \page convolution Example of waveform convolution/smoothing
@@ -47,8 +48,10 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <cstdlib>
 
 #include "TApplication.h"
+#include "TROOT.h"
 #include "TMath.h"
 #include "TStyle.h"
 #include "TGraph.h"
@@ -73,6 +76,11 @@ double spe_response(double x) {
 }
 
 int example_wdeck_smoothing(int n_p = 2) {
+
+  const bool use_batch_mode = (std::getenv("CI")) ? true : false;
+  if (use_batch_mode) {
+    gROOT->SetBatch(kTRUE);
+  }
 
   const int size = 1024;
   const double t0 = 0.0;
@@ -193,12 +201,18 @@ int example_wdeck_smoothing(int n_p = 2) {
     else    gfltr[i]->Draw("l");
   }
 
+  if (use_batch_mode) {
+    cWaveform->SaveAs("example_1_smoothing.png");
+  }
 
   return 0;
 }
 
 int main(int argc, char* argv[])
 {
+  const bool use_batch_mode = 
+    (std::getenv("CI") || std::getenv("GITHUB_ACTIONS")) ? true : false;
+
   int n_pulses = 3;
   if (argc > 1)
     n_pulses = std::atoi(argv[1]);
@@ -207,7 +221,7 @@ int main(int argc, char* argv[])
   
   example_wdeck_smoothing(n_pulses);
   
-  tapp->Run();
+  if (!use_batch_mode) tapp->Run();
     
   return 0;
 }

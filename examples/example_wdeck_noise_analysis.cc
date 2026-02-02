@@ -2,24 +2,51 @@
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
  * @file        : example_wdeck_noise_analysis.cc
  * @created     : Monday Feb 02, 2026 11:11:02 CET
+ *
+ * \page noise Example of noise analysis and synthesis
+ *
+ * Source file: `examples/example_wdeck_noise_analysis.cc`
+ *
+ * This script shows how to use **WaveDeck** to generate synthetic noise waveforms
+ * from a reference noise power spectral density (PSD) template through the
+ * `TWDeckWfmModel` class.
+ *
+ * The reference noise PSD template is read from an external text file
+ * and used to build a `TWDeckWfmModel` instance. This model is then employed
+ * to produce multiple synthetic noise waveforms using the `TWDeck::Produce` method.
+ * The generated waveforms are analyzed to compute their average power spectral density,
+ * which is then compared to the original template.
+ *
+ * ![noise analysis example output](example_noise_analysis.png)
+ *
+ * \include example_wdeck_noise_analysis.cc
  */
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <getopt.h>
+#include "TROOT.h"
 #include "TApplication.h"
 #include "TStyle.h"
 #include "TCanvas.h"
+#include "TGraph.h"
+#include "TLegend.h"
 #include "TH1D.h"
 
+#include "TWDeckPATH.h"
 #include "TWDeck.h"
 #include "TWDeckWfmModel.h"
 
-int example_wdeck_noise_spectra(
+int example_wdeck_noise_analysis(
     const TString noise_template_path = "../examples/noise_template.txt", 
     const bool debug_waveforms = false)
 {
+  const bool use_batch_mode = 
+    (std::getenv("CI") || std::getenv("GITHUB_ACTIONS")) ? true : false;
+  if (use_batch_mode) {
+    gROOT->SetBatch(kTRUE);
+  }
+
   // ----------------------------------------------------------
   // setup waveform parameters
   const int wsize = 1024;
@@ -110,17 +137,35 @@ int example_wdeck_noise_spectra(
   gStyle->SetPalette(kViridis);
   gStyle->SetOptStat(0);
   TCanvas* cModel = new TCanvas("cModel", "noise model", 0, 0, 800, 600); 
+  cModel->SetTicks(1, 1);
+  cModel->SetGrid(1, 1);
+  cModel->SetLogy(1);
 
   auto h2PSD = generated_noise_model.GetSpectralDensityHist(); 
+  h2PSD->SetXTitle("Frequency component"); 
+  h2PSD->SetYTitle("Power Spectral Density [a.u.]");
   h2PSD->DrawClone("colz"); 
 
   auto model_pts = noise_template_model.GetSpectralDensityPoints();
   std::vector<double> model_freq(model_pts.size(), 0.0); 
   int ifreq = 0; 
   for (auto& f : model_freq) {f = ifreq; ifreq++;}
-  TGraph gModel(model_pts.size(), model_freq.data(), noise_template.data()); 
-  gModel.DrawClone("l same"); 
+  TGraph* gModel = new TGraph(model_pts.size(), model_freq.data(), model_pts.data()); 
+  gModel->SetLineWidth(3);
+  gModel->DrawClone("l same"); 
 
+  auto avg_pts = generated_noise_model.GetSpectralDensityPoints();
+  TGraph* gAvg = new TGraph(avg_pts.size(), model_freq.data(), avg_pts.data());
+  gAvg->SetMarkerColor(kGray+1);
+  gAvg->SetMarkerStyle(20);
+  gAvg->SetMarkerSize(0.5);
+  gAvg->DrawClone("p same");
+
+  TLegend* leg = new TLegend(0.11, 0.88, 0.6, 0.75);
+  leg->SetMargin(0.07);
+  leg->AddEntry(gModel, "Reference Noise Template PSD", "l");
+  leg->AddEntry(gAvg, "Generated Noise Avg PSD", "p");
+  leg->Draw();
   
   if (debug_waveforms == true) {
     TCanvas* cWfm = new TCanvas("cWfm", "Synthetic Noise Waveforms", 0, 0, 1200, 800);
@@ -131,18 +176,33 @@ int example_wdeck_noise_spectra(
     }
   }
 
+  if (use_batch_mode) {
+    cModel->SaveAs("example_4_wdeck_noise_model.png");
+  }
+
   return 0;
 }
 
 int main (int argc, char *argv[])
 {
-  int choice = 0;
+  const bool use_batch_mode = 
+    (std::getenv("CI") || std::getenv("GITHUB_ACTIONS")) ? true : false;
+
+  TString noise_template_path = Form("%s/examples/noise_generic_model.txt", WDECK_PROJECT_DIR);
+  bool debug_waveforms = false;
+
+  if (argc > 1) {
+    noise_template_path = TString(argv[1]);
+  }
+  if (argc > 2) {
+    debug_waveforms = (std::atoi(argv[2]) != 0);
+  }
 
   TApplication* tapp = new TApplication("example_wdeck_noise_analysis", &argc, argv);
 
-  example_wdeck_noise_spectra();
+  example_wdeck_noise_analysis(noise_template_path, debug_waveforms);
 
-  tapp->Run();
+  if (!use_batch_mode) tapp->Run();
 
   return 0;
 }

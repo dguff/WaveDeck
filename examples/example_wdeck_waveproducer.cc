@@ -26,11 +26,13 @@
  */
 
 #include <iostream>
+#include <cstdlib>
 #include <vector>
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TRandom3.h"
 #include "TLegend.h"
+#include "TROOT.h"
 #include "TApplication.h"
 
 #include "TF1.h"
@@ -44,6 +46,11 @@ std::vector<double> build_spe_response(int size, double t0, double t1);
 
 int example_wdeck_waveproducer()
 {
+  const bool use_batch_mode = (std::getenv("CI")) ? true : false;
+  if (use_batch_mode) {
+    gROOT->SetBatch(kTRUE);
+  }
+
   //- - - - - - - - - - - - - - - - - - - - - - - -environment setup
   const int size = 2500;
   const double t0 = 0.;
@@ -150,6 +157,10 @@ int example_wdeck_waveproducer()
   leg_noise->AddEntry(gmpds, gmpds->GetTitle(), "l");
   leg_noise->Draw();
 
+  if (use_batch_mode) {
+    cOrigins->SaveAs("example_2_producer_wave.png");
+    cNoise->SaveAs("example_2_producer_noise.png");
+  }
 
   return 0;
 }
@@ -193,10 +204,12 @@ std::vector<double> build_spe_response(int size, double t0, double t1) {
 }
 
 int main(int argc, char** argv) {
+  const bool use_batch_mode = 
+    (std::getenv("CI") || std::getenv("GITHUB_ACTIONS")) ? true : false;
 
   TApplication* tapp = new TApplication("example_wdeck_waveproducer", &argc, argv);
   example_wdeck_waveproducer();
-  tapp->Run();
+  if (!use_batch_mode) tapp->Run();
 
   return 0;
 }

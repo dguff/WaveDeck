@@ -28,6 +28,11 @@ set(WDECK_DOC_DIR     "${PROJECT_SOURCE_DIR}/docs")
 set(WDECK_EXAMPLE_DIR "${PROJECT_SOURCE_DIR}/examples")
 set(WDECK_INSTALL_CMAKE_DIR "${WDECK_LIB_DIR}/cmake/${PROJECT_NAME}")
 
+# -----------------------------------------------------------------
+# Set project build options
+option(BUILD_TESTING "Build unit tests" ON)
+option(BUILD_EXAMPLES "Build example executables" ON)
+
 #-----------------------------------------------------------------
 # Include headers for this project
 
@@ -52,10 +57,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 # add subdirectory to build WaveDeck libraries
 add_subdirectory(${WDECK_SOURCE_DIR})
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Add executables 
-add_subdirectory("${WDECK_EXAMPLE_DIR}")
-
 # Add libraries targets to the build-tree export set
 export(TARGETS TWDeckWfm TWDeck
   FILE "${PROJECT_BINARY_DIR}/WaveDeckTargets.cmake")
@@ -64,8 +65,17 @@ export(PACKAGE WaveDeck)
 
 #-----------------------------------------------------------------
 # Unit Testing
-enable_testing()
-add_subdirectory(tests)
+if (BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Add example executables 
+if (BUILD_EXAMPLES)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/examples_output_plots)
+  add_subdirectory("${WDECK_EXAMPLE_DIR}")
+endif()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Generate documentation using doxygen 

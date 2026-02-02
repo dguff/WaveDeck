@@ -43,7 +43,21 @@ jobs:
         cd build
         cmake --build . 
 
-    - name: Run Tests
-      run: |
-        cd build
-        ctest --output-on-failure
+    - name: Run Unit Tests
+      working-directory: build
+      run: ctest -E "ExampleTest" --output-on-failure
+
+    - name: Run Example Test
+      working-directory: build
+      run: ctest -R "ExampleTest" --output-on-failure
+      env:
+        CI: "true"
+
+    - name: Upload Plot Artifacts
+      uses: actions/upload-artifact@v4
+      if: success() 
+      with:
+        name: output-plots
+        path: |
+          build/examples_output_plots/*.png
+        retention-days: 5

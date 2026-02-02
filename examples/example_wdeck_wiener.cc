@@ -32,8 +32,10 @@
  */
 
 #include <stdio.h>
+#include <cstdlib>
 #include <iostream>
 
+#include "TROOT.h"
 #include "TApplication.h"
 #include "TMath.h"
 #include "TStyle.h"
@@ -50,10 +52,14 @@
 
 
 int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
+  const bool use_batch_mode = (std::getenv("CI")) ? true : false;
+  if (use_batch_mode) {
+    gROOT->SetBatch(kTRUE);
+  }
 
   gStyle->SetPalette(kSunset);
 
-  const int size = 10000;
+  const int size = 1000;
   const double t0 =  0.0;
   const double t1 = 50.0;
   double dt = (t1-t0) / size;
@@ -67,7 +73,7 @@ int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
     return y;
   };
 
-  new TCanvas();
+  TCanvas* cSpe = new TCanvas("cSpe", "spe response", 800, 600);
   gspe_origin->Draw("awpl");
 
 
@@ -173,7 +179,7 @@ int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
     cNoiseDensity->cd(1);
     wm_noise->GetWavefmDensityHist()  ->Draw("colz");
     TGraph* gwmodel_wave = new TGraph(size, &xtick[0], &wm_noise->GetWfm()[0]);
-    gwmodel_wave->SetLineWidth(3); gwmodel_wave->SetLineWidth(kMagenta+7);
+    gwmodel_wave->SetLineWidth(1); gwmodel_wave->SetLineWidth(kMagenta+7);
     gwmodel_wave->Draw("l");
     cNoiseDensity->cd(2);
     gPad->SetLogy(1);
@@ -182,7 +188,7 @@ int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
     int iw=0;
     for (auto &v : wnoise_sd) {v = wm_noise->GetSpectralDensity(iw); ++iw;}
     TGraph* gwmodel_sptd = new TGraph(0.5*size+1, &xtick[0], &wnoise_sd[0]);
-    gwmodel_sptd->SetLineWidth(3); gwmodel_sptd->SetLineWidth(kMagenta+7);
+    gwmodel_sptd->SetLineWidth(1); gwmodel_sptd->SetLineWidth(kMagenta+7);
     gwmodel_sptd->Draw("l");
 
     // - - - - - - - - - - - - - -  Plot the spectral density of the spe response,
@@ -211,11 +217,20 @@ int example_wdeck_wiener(int n_p = 2, bool do_display = true) {
     gDwiener->Draw(  "l");
   }
 
+  if (use_batch_mode && do_display) {
+    cWaveform       ->SaveAs("example_3_wiener_waveform.png");
+    cNoiseDensity   ->SaveAs("example_3_wiener_noise_density.png");
+    cSpectralDensity->SaveAs("example_3_wiener_spectral_density.png");
+  }
+
   return 0;
 }
 
 int main(int argc, char* argv[])
 {
+  const bool use_batch_mode = 
+    (std::getenv("CI") || std::getenv("GITHUB_ACTIONS")) ? true : false;
+
   int n_pulses = 3;
   if (argc > 1)
     n_pulses = std::atoi(argv[1]);
@@ -224,7 +239,7 @@ int main(int argc, char* argv[])
   
   example_wdeck_wiener(n_pulses);
   
-  tapp->Run();
+  if (!use_batch_mode) tapp->Run();
     
   return 0;
 }

@@ -5,6 +5,7 @@
  */
 
 #include "TWDeckWfmModel.h"
+#include "TComplex.h"
 
 ClassImp(TWDeckWfmModel)
 
@@ -125,6 +126,7 @@ void TWDeckWfmModel::BuildSpectralDensity(double* xre, double* xim) {
   std::vector<double> ybins(ybins_ex);
   for (auto &v : ybins) v = TMath::Power(10., v);
 
+  if (fSpectralDensityHist) delete fSpectralDensityHist;
   fSpectralDensityHist = new TH2D(
       Form("%s_sdensity", fName.Data()), 
       Form("%s spectral density", fTitle.Data()), 
@@ -179,6 +181,29 @@ void TWDeckWfmModel::AddSpectrum(double* re, double* im)
     fSpectralDensity.at(j) = ((fNSampleSpectrum-1)*fSpectralDensity.at(j) + c_.Rho2()) / fNSampleSpectrum;
     fSpectralDensityHist->Fill(j, c_.Rho2());
   }
+  return;
+}
+
+/**
+ * @details Add the Fourier coefficients contained in the `spec`
+ * array to the model: the average value of the Fourier coefficients, as well 
+ * as the average spectral density is updated and the spectral density histogram 
+ * is filled. 
+ * If this is the first spectrum sample, the spectral density histogram is created 
+ * by means of the TWDeckWfmModel::BuildSpectralDensity function.
+ *
+ * @param spec
+ */
+void TWDeckWfmModel::AddSpectrum(TComplex* spec) 
+{
+  std::vector<double> re(fSize,0);
+  std::vector<double> im(fSize,0);
+
+  for (int i=0; i<fSize; i++) {
+    re[i] = spec[i].Re();
+    im[i] = spec[i].Im();
+  }
+  AddSpectrum(re.data(), im.data());
   return;
 }
 

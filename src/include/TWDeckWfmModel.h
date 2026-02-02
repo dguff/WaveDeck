@@ -48,6 +48,8 @@ class TWDeckWfmModel : public TWDeckWfm {
     void AddWaveform(double* data);
     //! Add a new sample to the spectrum model
     void AddSpectrum(double* re, double* im);
+    //! Add a new sample to the spectrum model
+    void AddSpectrum(TComplex* spec);
 
     //! Get the model spectral density histogram
     inline TH2D* GetSpectralDensityHist() {return fSpectralDensityHist;}

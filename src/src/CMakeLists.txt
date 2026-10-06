@@ -13,6 +13,11 @@ add_library(TWDeckWfm
   ${WDECK_INCLUDE_DIR}/TWDeckWfm.h
   )
 
+target_include_directories(TWDeckWfm PUBLIC
+  $<BUILD_INTERFACE:${WDECK_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:${WDECK_INSTALL_INCLUDE_DIR}>
+)
+
 target_link_libraries(TWDeckWfm PUBLIC ${ROOT_LIBRARIES})
 
 ROOT_GENERATE_DICTIONARY(G__TWDeckWfm
@@ -31,6 +36,12 @@ add_library(TWDeck
   ${WDECK_SOURCE_DIR}/TWDeck.cc
   ${WDECK_INCLUDE_DIR}/TWDeck.h
   )
+
+target_include_directories(TWDeck PUBLIC
+  $<BUILD_INTERFACE:${WDECK_INCLUDE_DIR}>
+  $<INSTALL_INTERFACE:${WDECK_INSTALL_INCLUDE_DIR}>
+)
+
 target_link_libraries(TWDeck PUBLIC TWDeckWfm ${ROOT_LIBRARIES})
 
 ROOT_GENERATE_DICTIONARY(G__TWDeck
@@ -62,8 +73,15 @@ foreach(lib IN LISTS TWDeck_libs)
   install(TARGETS ${lib}
     EXPORT                      WaveDeckTargets
     LIBRARY DESTINATION        "${WDECK_LIB_DIR}" 
-    RUNTIME DESTINATION        "${WDECK_BIN_DIR}")
+    RUNTIME DESTINATION        "${WDECK_LIB_DIR}")
 endforeach()
 
 install(FILES ${TWDeck_resources} DESTINATION "${WDECK_LIB_DIR}")
 
+# install headers 
+install(DIRECTORY ${WDECK_INCLUDE_DIR}/
+  DESTINATION "${WDECK_INSTALL_INCLUDE_DIR}"
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN "gtest" EXCLUDE
+  PATTERN "gmock" EXCLUDE
+)

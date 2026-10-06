@@ -6,9 +6,10 @@
 
 @PACKAGE_INIT@
 
-set_and_check(WDECK_INCLUDE_DIR "@PACKAGE_WDECK_INCLUDE_DIR@")
+set_and_check(WDECK_INSTALL_DIR "@PACKAGE_WDECK_INSTALL_DIR@")
+set_and_check(WDECK_INCLUDE_DIR "@PACKAGE_WDECK_INSTALL_INCLUDE_DIR@")
 set_and_check(WDECK_LIB_DIR "@PACKAGE_WDECK_LIB_DIR@")
-set_and_check(WDECK_BIN_DIR "@PACKAGE_WDECK_BIN_DIR@")
+set_and_check(WDECK_EXAMPLE_DIR "@PACKAGE_WDECK_INSTALL_EXAMPLE_DIR@")
 
 # Our library dependencies (contains definitions for IMPORTED targets)
 include("@PACKAGE_WDECK_INSTALL_CMAKE_DIR@/WaveDeckTargets.cmake")

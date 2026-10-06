@@ -20,8 +20,10 @@ include(ExternalProject)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set project paths
-get_filename_component(WDECK_BIN_DIR "${CMAKE_INSTALL_PREFIX}" ABSOLUTE)
-set(WDECK_LIB_DIR     "${WDECK_BIN_DIR}/lib")
+get_filename_component(WDECK_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}" ABSOLUTE)
+set(WDECK_LIB_DIR     "${WDECK_INSTALL_DIR}/lib")
+set(WDECK_INSTALL_INCLUDE_DIR "${WDECK_INSTALL_DIR}/include/wavedeck")
+set(WDECK_INSTALL_EXAMPLE_DIR "${WDECK_INSTALL_DIR}/examples")
 set(WDECK_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src/include")
 set(WDECK_SOURCE_DIR  "${PROJECT_SOURCE_DIR}/src/src")
 set(WDECK_DOC_DIR     "${PROJECT_SOURCE_DIR}/docs")
@@ -107,7 +109,7 @@ configure_package_config_file(
   cmake/WaveDeckConfig.cmake.in
   cmake/WaveDeckConfig.cmake
   INSTALL_DESTINATION "${WDECK_INSTALL_CMAKE_DIR}"
-  PATH_VARS WDECK_LIB_DIR WDECK_BIN_DIR WDECK_INCLUDE_DIR WDECK_INSTALL_CMAKE_DIR
+  PATH_VARS WDECK_LIB_DIR WDECK_INSTALL_DIR WDECK_INSTALL_EXAMPLE_DIR WDECK_INSTALL_INCLUDE_DIR WDECK_INSTALL_CMAKE_DIR
   )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake 

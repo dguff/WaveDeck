@@ -1,0 +1,19 @@
+name: CI Ubuntu 24.04 Validation
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.label.name == 'run-tests'
+    uses: ./.github/workflows/cmake_test.yml
+    with:
+      platform: ubuntu24.04-root6.32.02
+      root_image: rootproject/root:6.32.02-ubuntu24.04
+

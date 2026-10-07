@@ -1,15 +1,20 @@
-name: CI-test root:6.32.02-ubuntu22.04
+name: CMake Build and Test
 
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    types: [labeled]
-  workflow_dispatch:
+on: 
+  workflow_call:
+    inputs:
+      platform:
+        description: Display name for the ROOT/OS validation target.
+        required: true
+        type: string
+      root_image:
+        description: Fully qualified ROOT container image.
+        required: true
+        type: string
 
 jobs:
   build-and-test:
-    name: Build and Test in ROOT Container
+    name: Build and Test (${{ inputs.platform }})
     
     if: >
       (github.actor == github.repository_owner) || 
@@ -19,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     
     container:
-      image: rootproject/root:6.32.02-ubuntu22.04
+      image: ${{ inputs.root_image }}
 
     steps:
-    - name: Reset Label
+    - name: Reset run-test label
       if: github.event_name == 'pull_request'
       uses: actions-ecosystem/action-remove-labels@v1
       with:
@@ -35,21 +40,17 @@ jobs:
     - name: CMake configuration
       run: |
         mkdir build
-        cd build
-        cmake ..
+        cmake -S . -B build
 
     - name: Compile WaveDeck
       run: |
-        cd build
-        cmake --build . 
+        cmake --build build
 
     - name: Run Unit Tests
-      working-directory: build
-      run: ctest -E "ExampleTest" --output-on-failure
+      run: ctest --test-dir build -E "ExampleTest" --output-on-failure
 
     - name: Run Example Test
-      working-directory: build
-      run: ctest -R "ExampleTest" --output-on-failure
+      run: ctest --test-dir build -R "ExampleTest" --output-on-failure
       env:
         CI: "true"
 
@@ -57,7 +58,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: success() 
       with:
-        name: output-plots
-        path: |
-          build/examples_output_plots/*.png
+        name: output-plots-${{ inputs.platform }}
+        path: build/examples_output_plots/*.png
+        if-no-files-found: error
         retention-days: 5

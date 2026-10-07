@@ -2,7 +2,9 @@
 
 A command deck for ROOT-based digital pulse-processing
 
-![root:6.32.02-ubuntu22.04](https://github.com/dguff/WaveDeck/actions/workflows/cmake_test.yml/badge.svg)
+[![Ubuntu 22.04 / ROOT 6.32.02](https://github.com/dguff/WaveDeck/actions/workflows/validate-ubuntu2204.yml/badge.svg?branch=main)](https://github.com/dguff/WaveDeck/actions/workflows/validate-ubuntu2204.yml)
+[![Ubuntu 24.04 / ROOT 6.32.02](https://github.com/dguff/WaveDeck/actions/workflows/validate-ubuntu2404.yml/badge.svg?branch=main)](https://github.com/dguff/WaveDeck/actions/workflows/validate-ubuntu2404.yml)
+[![AlmaLinux 9 / ROOT 6.30.02](https://github.com/dguff/WaveDeck/actions/workflows/validate-alma9.yml/badge.svg?branch=main)](https://github.com/dguff/WaveDeck/actions/workflows/validate-alma9.yml)
 
 ## Installation
 

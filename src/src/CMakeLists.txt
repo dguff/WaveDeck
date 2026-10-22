@@ -44,6 +44,11 @@ target_include_directories(TWDeck PUBLIC
 
 target_link_libraries(TWDeck PUBLIC TWDeckWfm ${ROOT_LIBRARIES})
 
+set_target_properties(TWDeck PROPERTIES
+    BUILD_RPATH "${CMAKE_CURRENT_BINARY_DIR};${WDECK_LIB_DIR}"
+    INSTALL_RPATH "${WDECK_LIB_DIR}"
+  )
+
 ROOT_GENERATE_DICTIONARY(G__TWDeck
   ${WDECK_INCLUDE_DIR}/TWDeckWfmFilter.h
   ${WDECK_INCLUDE_DIR}/TWDeckWfmModel.h

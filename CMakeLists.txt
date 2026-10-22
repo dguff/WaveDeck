@@ -116,7 +116,8 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/WaveDeckConfig.cmake
   DESTINATION ${WDECK_INSTALL_CMAKE_DIR})
 
 # configure package config
-export(EXPORT WaveDeckTargets
-  FILE "${WDECK_INSTALL_CMAKE_DIR}/WaveDeckTargets.cmake"
+install(EXPORT WaveDeckTargets
+  FILE WaveDeckTargets.cmake
   NAMESPACE WaveDeck::
+  DESTINATION "${WDECK_INSTALL_CMAKE_DIR}"
 )
